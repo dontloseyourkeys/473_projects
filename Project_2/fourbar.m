@@ -44,7 +44,7 @@ TODO: write in bounding kinematic conditions for the mechanism here in
 comment form
 
 
-%]
+%}
 
 
 
