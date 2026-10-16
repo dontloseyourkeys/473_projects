@@ -98,6 +98,19 @@ hold on %allows everything here to be added to same figure
     xlim([xmin, xmax]);
     ylim([ymin, ymax]);
 
+
+    % plot object handles
+    % rocker = plot([x0 x3(1)],[y0 y3(1)],'-o','linewidth',2, 'Color', 'b'); %plot obejct for rocker arm, spans from p0-p3
+    % crank = plot([x1 x2(1)],[y1 y2(1)],'-o','linewidth',2, 'Color', 'r'); %plot object that sets initial location of the crank, spans p0-p2
+    % ground = line([0 r1],[0 0],'linewidth', 2,'color','#0C8A11',
+    %'LineStyle', '--'); %plot object for ground, does not need updating per frame
+    % slider object
+    %slider = patch(x_slider(:, 1), y_slider(:, 1), 'r', 'LineWidth', 1.5); % semicolon takes all 4 column vals, row 1
+
+
+
+hold off
+
 pause(1)    %added 1s pause to better show initial frame and allow data to load
 hold off
 
