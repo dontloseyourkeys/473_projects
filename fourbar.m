@@ -4,7 +4,7 @@ function fourbar(r1,r2,r3,r4,theta,speed,n)
 TODO explain function here
 %}
 
-
+%test 
 %{
 D2L instructions:
 Write a function fourbar(r1,r2,r3,r4,theta,speed,n) that animates n cycles of a fourbar linkage if link 2 is a crank (i.e. can make a full rotation), and prints an error message otherwise.
