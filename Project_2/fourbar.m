@@ -4,10 +4,6 @@ function fourbar(r1,r2,r3,r4,theta,speed,n)
 TODO explain function here
 %}
 
-%test 
-%second test
-
-
 %{
 D2L instructions:
 Write a function fourbar(r1,r2,r3,r4,theta,speed,n) that animates n cycles of a fourbar linkage if link 2 is a crank (i.e. can make a full rotation), and prints an error message otherwise.
@@ -28,11 +24,28 @@ The speed of the displayed animation should accurately reflect the input speed v
 
 %% TODOS
 %{
-todos go here
-
+Check Grashof's law
+Determine if mechanism is crank rocker or double crank
 %}
 
+link_lengths = [r1,r2,r3,r4];
+link_sum = sum(link_lengths);
 
+%Check if any of the link lengths are greater than the sum of the other
+%links
+for i = 1:4
+    if link_lengths(i) >= link_sum - link_lengths(i)
+        %Print associated error message and fix
+        fprintf(['A mechanism can not be assembled from the provided link lengths.\n' ...
+        'Please reduce the length of link %d to less than %.2f'], (i), sum(link_lengths) - link_lengths(i));
+        %Create the empty graph
+        title('Mechanism can not be assembled. See command window.');
+        pause(5);
+        %Stop checking if this error is found
+        break
+    end
+end
+%{
 %% Creating Figure
     figure('Position', [100, 100, 800, 800]) %makes the empty figure for the animation
     clf %clears figure if this function is run multiple times in a row
@@ -59,7 +72,7 @@ comment form
 
     rad_frame = speed / fps; %rads per frame, replaces astep
 
-    theta = 0:rad_frame:num_rotations*2*pi; %start:step:end notation, 0-3 full rotations, in steps of size astep      
+    %theta = 0:rad_frame:num_rotations*2*pi; %start:step:end notation, 0-3 full rotations, in steps of size astep      
 
     timestep = 1/fps; % fps inverted gives seconds per frame
     time = theta ./ speed; %ARRAY, (results in a time value in seconds for plotting angles)
@@ -124,5 +137,5 @@ hold off
         %set(objectHandle,'XData',[xstart ymiddle xend],'YData',[ystart ymiddle yend]);
         %%syntax, can add more points in square brackets 
       
-
+%}
     end
