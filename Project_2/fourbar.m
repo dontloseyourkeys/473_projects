@@ -55,10 +55,10 @@ if spql(1) + spql(4) < spql(2) + spql(3)
         %An undesired mechanism results from the provided lengths
         if r3 == spql(1)
             fprintf('This is a double rocker.\n')
-            fprintf('Increase r3.\n')
+            fprintf('Increase r3 to more than %.2f.\n', spql(2))
         else 
             fprintf('This is a crank rocker with r4 as the crank.\n.')
-            fprintf('Increase r4.\n')
+            fprintf('Increase r4 to more than %.2f.\n', spql(2))
         end
     end
 else
@@ -68,7 +68,7 @@ else
     else
         fprintf('This is a triple rocker.\n')
     end
-    fprintf('Shorten the link of length %.2f.\n', spql(4))
+    fprintf('Shorten the link of length %.2f. to less than %.2f\n', spql(4), spql(3))
 end
 
 %{
