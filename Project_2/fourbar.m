@@ -37,7 +37,7 @@ for i = 1:4
     if link_lengths(i) >= link_sum - link_lengths(i)
         %Print associated error message and fix
         fprintf(['A mechanism can not be assembled from the provided link lengths.\n' ...
-        'Please reduce the length of link %d to less than %.2f'], (i), sum(link_lengths) - link_lengths(i));
+        'Please reduce the length of link %d to less than %.2f\n'], (i), sum(link_lengths) - link_lengths(i));
         %Create the empty graph
         title('Mechanism can not be assembled. See command window.');
         pause(5);
@@ -45,7 +45,41 @@ for i = 1:4
         break
     end
 end
+
+%Check if r2 can fully rotate according to Grashof's law
+spql = sort(link_lengths);
+%check if the mechanism can rotate
+if spql(1) + spql(4) < spql(2) + spql(3)
+    %Classify the mechanism
+    if r1 == spql(1)
+        fprintf('This is a double-crank\n')
+        fprintf('The provided lengths are acceptable.')
+    elseif r2 == spql(1)
+        fprintf('This is a crank-rocker with r2 as the crank\n')
+        fprintf('The provided lengths are acceptable.')
+    else
+        %An undesired mechanism results from the provided lengths
+        if r3 == spql(1)
+            fprintf('This is a double rocker.\n')
+            fprintf('Increase r3.\n')
+        else 
+            fprintf('This is a crank rocker with r4 as the crank.\n.')
+            fprintf('Increase r4.\n')
+        end
+    end
+else
+    %An undesired mechanism results from the provided lengths
+    if spql(1) + spql(4) == spql(2) + spql(3)
+        fprintf('This is a change point mechanism.\n')
+    else
+        fprintf('This is a triple rocker.\n')
+    end
+    fprintf('Shorten the link of length %.2f.\n', spql(4))
+end
+
 %{
+thetaValues = theta + (0:2*pi*n) ;
+
 %% Creating Figure
     figure('Position', [100, 100, 800, 800]) %makes the empty figure for the animation
     clf %clears figure if this function is run multiple times in a row
