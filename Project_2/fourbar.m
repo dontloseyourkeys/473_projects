@@ -46,10 +46,10 @@ spql = sort(link_lengths);
 if spql(1) + spql(4) < spql(2) + spql(3)
     %Classify the mechanism
     if r1 == spql(1)
-        fprintf('This is a double-crank\n')
+        fprintf('This is a double-crank.\n')
         fprintf('The provided lengths are acceptable.\n')
     elseif r2 == spql(1)
-        fprintf('This is a crank-rocker with r2 as the crank\n')
+        fprintf('This is a crank-rocker with r2 as the crank.\n')
         fprintf('The provided lengths are acceptable.\n')
     else
         %An undesired mechanism results from the provided lengths
