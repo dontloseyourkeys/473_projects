@@ -22,12 +22,6 @@ The speed of the displayed animation should accurately reflect the input speed v
 
 %}
 
-%% TODOS
-%{
-Check Grashof's law
-Determine if mechanism is crank rocker or double crank
-%}
-
 link_lengths = [r1,r2,r3,r4];
 link_sum = sum(link_lengths);
 
@@ -53,10 +47,10 @@ if spql(1) + spql(4) < spql(2) + spql(3)
     %Classify the mechanism
     if r1 == spql(1)
         fprintf('This is a double-crank\n')
-        fprintf('The provided lengths are acceptable.')
+        fprintf('The provided lengths are acceptable.\n')
     elseif r2 == spql(1)
         fprintf('This is a crank-rocker with r2 as the crank\n')
-        fprintf('The provided lengths are acceptable.')
+        fprintf('The provided lengths are acceptable.\n')
     else
         %An undesired mechanism results from the provided lengths
         if r3 == spql(1)
