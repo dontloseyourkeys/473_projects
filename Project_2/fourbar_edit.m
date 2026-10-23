@@ -49,19 +49,23 @@ if spql(1) + spql(4) < spql(2) + spql(3)
     if r1 == spql(1)
         fprintf('This is a double-crank.\n')
         fprintf('The provided lengths are acceptable.\n\n')
+        graph_title = 1; %  double crank
 
     elseif r2 == spql(1)
         fprintf('This is a crank-rocker with r2 as the crank.\n')
         fprintf('The provided lengths are acceptable.\n\n')
+        graph_title = 2; % crank rocker
 
     else
         %An undesired mechanism results from the provided lengths
         if r3 == spql(1)
             fprintf('This is a double rocker.\n')
             fprintf('Increase r3 to more than %.2f.\n\n', spql(2))
+            graph_title = 3; % double rocker
         else 
             fprintf('This is a crank rocker with r4 as the crank.\n.')
             fprintf('Increase r4 to more than %.2f.\n\n', spql(2))
+            graph_title = 3; % double rocker
         end
     end
 
@@ -153,8 +157,6 @@ b4 = (r3^2 - r4^2 - span.^ 2) ./ (-2 .* span);
 %h_34 = sqrt(r4^2 - b4 .^2);
 h_34 = sqrt(max(0, r4^2 - b4.^2)); %avoids rounding
 
-
-
 %finding temp point that is on span that is where the 2 right triangle split is
 x_temp = b4 .* x2_unit_vec;
 y_temp = b4 .* y2_unit_vec;
@@ -178,8 +180,8 @@ y3Alt = (h_34 .* -y2_norm_vec) + y_temp;
 
 % TODO set titles here
 
-%if title = 
- %set 
+
+
 
 
 % Setting reasonable axes for both plots
@@ -197,6 +199,19 @@ ymax = 1.2*max([max(y2) max(y3) max(y3Alt)]); %120% safety margin on lowest posi
 ax1 = subplot(1, 2, 1); %left subplot for the animation
 hold on %allows everything here to be added to same figure
 
+graph_title
+if graph_title == 1
+   title('double crank');
+
+
+elseif graph_title == 2
+   title('crank rocker');
+
+elseif graph_title ==3 
+   title('Change link parameters: see console');
+
+end
+
     xlim([xmin, xmax]);
     ylim([ymin, ymax]);
     daspect([1 1 1]);
@@ -211,7 +226,20 @@ hold on %allows everything here to be added to same figure
 
 %% Frame 1, right plot (alternate orientation)
 ax2 = subplot(1, 2, 2); %right subplot for the animation
+
 hold on %allows everything here to be added to same figure
+
+if graph_title == 1
+   title('double crank inversion');
+
+
+elseif graph_title == 2
+   title('crank rocker inversion');
+
+elseif graph_title ==3 
+   title('Change link parameters: see console');
+
+end
 
     %axes limits reused from subplot 1
     xlim([xmin, xmax]); 
