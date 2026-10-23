@@ -167,7 +167,7 @@ y3Alt = r4*sin(alphaALT);
 
 
 %% plotting initial frame of orientation 1
-%ax1 = subplot(3, 1, [1 2]); %subplot for the animation, 2 rows, 1 column, editing subplot 1
+ax1 = subplot(3, 1, [1 2]); %subplot for the animation, 2 rows, 1 column, editing subplot 1
 hold on %allows everything here to be added to same figure
 
 % TODO set titles here
@@ -179,15 +179,14 @@ hold on %allows everything here to be added to same figure
     xmax = 1.2*max(x2); %120% safety margin on rightmost position of link 2
     %disp([xmin xmax])
     ymin = 1.2*min([min(y2) min(y3)]); %120% safety margin on highest position of link 2 or link 4
-    ymax = 1.2*max([max(y2) max(y3)]); %120% safety margin on lowest position of link 2 or link 4
-    %disp([ymin ymax])
+    ymax = 1.2*max([max(y2) max(y3)]); %120% safety margin on lowest position of link 2 or link 
     xlim([xmin, xmax]);
     ylim([ymin, ymax]);
 
 
     % plot object handles for orientation 1
-    link4 = plot([x0 x3(1)],[y0 y3(1)],'-o','linewidth',2, 'Color', 'b'); %plot obejct for rocker arm, spans from p0-p3
-    link2 = plot([x1 x2(1)],[y1 y2(1)],'-o','linewidth',2, 'Color', 'r'); %plot object that sets initial location of the crank, spans p0-p2
+    link4 = plot([x0 x3(1)],[y0 y3(1)],'-o','linewidth',2, 'Color', 'r'); %plot obejct for rocker arm, spans from p0-p3
+    link2 = plot([x1 x2(1)],[y1 y2(1)],'-o','linewidth',2, 'Color', 'b'); %plot object that sets initial location of the crank, spans p0-p2
     link3 = plot([x2(1) x3(1)],[y2(1) y3(1)],'-o','linewidth',2, 'Color', 'r');
     ground = line([0 r1],[0 0],'linewidth', 2,'color','#0C8A11','LineStyle', '--'); %plot object for ground, does not need updating per frame
  
