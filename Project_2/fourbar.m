@@ -147,19 +147,18 @@ y0 = 0;
 x1 = r1;
 y1 = 0;
 
-
 %theta array
 thetaValues = theta + (0:2*pi*n) ;
-%link 2 free end coorindates
+%link 2 free end coordinates
 x2 = x1 + r2*cos(thetaValues);
 y2 = r2*sin(thetaValues);
 %span
 span = r1^2 + r2^2 - 2*r1*r2*cos(thetaValues);
 %phi
-phi = acos((span^2-r4^2-r3^2)/(2*r3*r4)); %Will be the same for both orientations
+phi = acos((span.^2-r4^2-r3^2)/(2*r3*r4)); %Will be the same for both orientations
 %alpha and alphaALT
-alpha = asin(r2*sin(thetaValues)/span) + asin(r3*sin(phi)/span);
-alphaALT = asin(r2*sin(thetaValues)/span) - asin(r3*sin(phi)/span);
+alpha = asin(r2.*sin(thetaValues)./span) + asin(r3.*sin(phi)./span);
+alphaALT = asin(r2.*sin(thetaValues)./span) - asin(r3.*sin(phi)./span);
 %Link 4 free-end coordinates for both assembly orientations
 x3 = r4*cos(alpha);
 y3 = r4*sin(alpha);
@@ -167,7 +166,7 @@ x3Alt = r4*cos(alphaALT);
 y3Alt = r4*sin(alphaALT);
 
 
-%% plotting initial frame
+%% plotting initial frame of orientation 1
 ax1 = subplot(3, 1, [1 2]); %subplot for the animation, 2 rows, 1 column, editing subplot 1
 hold on %allows everything here to be added to same figure
 
@@ -176,20 +175,20 @@ hold on %allows everything here to be added to same figure
 % TODO set axes limits here
 
     %TODO define xmin, xmax, ymin, ymax
-
+    xmin = 1.2*min(x3); %120% safety margin on leftmost position of link 4
+    xmax = 1.2*max(x2); %120% safety margin on rightmost position of link 2
+    ymin = 1.2*min([min([y2]) min([y3])]); %120% safety margin on highest position of link 2 or link 4
+    ymax = 1.2*max([max([y2]) max([y3])]); %120% safety margin on lowest position of link 2 or link 4
     xlim([xmin, xmax]);
     ylim([ymin, ymax]);
 
 
-    % plot object handles
-    % rocker = plot([x0 x3(1)],[y0 y3(1)],'-o','linewidth',2, 'Color', 'b'); %plot obejct for rocker arm, spans from p0-p3
-    % crank = plot([x1 x2(1)],[y1 y2(1)],'-o','linewidth',2, 'Color', 'r'); %plot object that sets initial location of the crank, spans p0-p2
-    % ground = line([0 r1],[0 0],'linewidth', 2,'color','#0C8A11',
-    %'LineStyle', '--'); %plot object for ground, does not need updating per frame
-    % slider object
-    %slider = patch(x_slider(:, 1), y_slider(:, 1), 'r', 'LineWidth', 1.5); % semicolon takes all 4 column vals, row 1
-
-
+    % plot object handles for orientation 1
+    link4 = plot([x0 x3(1)],[y0 y3(1)],'-o','linewidth',2, 'Color', 'b'); %plot obejct for rocker arm, spans from p0-p3
+    link2 = plot([x1 x2(1)],[y1 y2(1)],'-o','linewidth',2, 'Color', 'r'); %plot object that sets initial location of the crank, spans p0-p2
+    link3 = plot([x2(1) x3(1)],[y2(1) y3(1)],'-o','linewidth',2, 'Color', 'r')
+    ground = line([0 r1],[0 0],'linewidth', 2,'color','#0C8A11','LineStyle', '--'); %plot object for ground, does not need updating per frame
+ 
 
 hold off
 
