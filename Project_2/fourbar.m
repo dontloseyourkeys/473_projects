@@ -182,10 +182,10 @@ hold on %allows everything here to be added to same figure
 
     %TODO define xmin, xmax, ymin, ymax
     xmin = 1.2*min([x0 min(x3)]); %120% safety margin on leftmost position of link 4
-    if xmin == 0 %Manually sets bound if x0 is the min
-        xmin = -1.5;
-    end
     xmax = 1.2*max(x2); %120% safety margin on rightmost position of link 2
+     if xmin == 0 %Manually sets bound if x0 is the min
+        xmin = -(xmax-(r1+r2));
+    end
     %disp([xmin xmax])
     ymin = 1.2*min([min(y2) min(y3)]); %120% safety margin on highest position of link 2 or link 4
     ymax = 1.2*max([max(y2) max(y3)]); %120% safety margin on lowest position of link 2 or link 
@@ -198,7 +198,6 @@ hold on %allows everything here to be added to same figure
     link3 = plot([x2(1) x3(1)],[y2(1) y3(1)],'-o','linewidth',2, 'Color', 'r');
     ground = line([0 r1],[0 0],'linewidth', 2,'color','#0C8A11','LineStyle', '--'); %plot object for ground, does not need updating per frame
  
-
 hold off
 
 pause(1)    %added 1s pause to better show initial frame and allow data to load
