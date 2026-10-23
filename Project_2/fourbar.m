@@ -162,7 +162,7 @@ phi = acos(((r4^2+r3^2)-span.^2)/(2*r3*r4)); %Will be the same for both orientat
 %disp(phi)
 %alpha and alphaALT
 alpha = (asin(r2.*sin(thetaValues)./span)) + (asin(r3.*sin(phi)./span));
-alphaALT = (asin(r2*sin(thetaValues)/span)) - (asin(r3*sin(phi)/span));
+alphaALT = (asin(r2.*sin(thetaValues)./span)) - (asin(r3.*sin(phi)./span));
 %disp([alpha])
 %Link 4 free-end coordinates for both assembly orientations
 x3 = r4*cos(alpha);
@@ -183,7 +183,7 @@ hold on %allows everything here to be added to same figure
     %TODO define xmin, xmax, ymin, ymax
     xmin = 1.2*min([x0 min(x3)]); %120% safety margin on leftmost position of link 4
     xmax = 1.2*max(x2); %120% safety margin on rightmost position of link 2
-     if xmin == 0 %Manually sets bound if x0 is the min
+    if xmin == 0 %Manually sets bound if x0 is the min
         xmin = -(xmax-(r1+r2));
     end
     %disp([xmin xmax])
@@ -197,14 +197,38 @@ hold on %allows everything here to be added to same figure
     link2 = plot([x1 x2(1)],[y1 y2(1)],'-o','linewidth',2, 'Color', 'b'); %plot object that sets initial location of the crank, spans p0-p2
     link3 = plot([x2(1) x3(1)],[y2(1) y3(1)],'-o','linewidth',2, 'Color', 'r');
     ground = line([0 r1],[0 0],'linewidth', 2,'color','#0C8A11','LineStyle', '--'); %plot object for ground, does not need updating per frame
- 
-hold off
+    
+    hold off
+
+    %alternate orientation
+    ax2 = subplot(3, 1, 3); %subplot for the animation, 3 rows, 1 column, editing subplot 3
+    hold on %allows everything here to be added to same figure
+    
+    %TODO define xmin, xmax, ymin, ymax
+    xminAlt = 1.2*min([x0 min(x3Alt)]); %120% safety margin on leftmost position of link 4
+    xmaxAlt = 1.2*max(x2); %120% safety margin on rightmost position of link 2
+    if xminAlt == 0 %Manually sets bound if x0 is the min
+        xminAlt = -(xmax-(r1+r2));
+    end
+    %disp([xmin xmax])
+    yminAlt = 1.2*min([min(y2) min(y3Alt)]); %150% safety margin on highest position of link 2 or link 4
+    ymaxAlt = 1.2*max([max(y2) max(y3Alt)]); %150% safety margin on lowest position of link 2 or link 
+    xlim([xminAlt, xmaxAlt]);
+    ylim([yminAlt, ymaxAlt]);
+
+    %plot object handles for orientation 2
+    ground = line([0 r1],[0 0],'linewidth', 2,'color','#0C8A11','LineStyle', '--'); %plot object for ground, does not need updating per frame
+    link2Alt = plot([x1 x2(1)],[y1 y2(1)],'-o','linewidth',2, 'Color', 'b'); %plot object that sets initial location of the crank, spans p0-p2
+    link4Alt = plot([x0 x3Alt(1)],[y0 y3Alt(1)],'-o','linewidth',2, 'Color', 'r'); %plot obejct for rocker arm, spans from p0-p3
+    link3Alt = plot([x2(1) x3Alt(1)],[y2(1) y3Alt(1)],'-o','linewidth',2, 'Color', 'r');
+
+    hold off
 
 pause(1)    %added 1s pause to better show initial frame and allow data to load
 hold off
 
-%% Frame updates
-            
+%% Frame updates for both plots
+            %TODO calculate seconds per frame right
     for n = 2:length(thetaValues)
         pause(0.1) %shows previous frame for timestep length
                 
@@ -215,6 +239,12 @@ hold off
         %set(phi_mark, 'XData', time(n), 'YData', phi(n));
             
         set(link3,'XData',[x2(n) x3(n)],'YData',[y2(n) y3(n)]);
+
+        set(link2Alt,'XData',[x1 x2(n)],'YData',[y1 y2(n)]);
+
+        set(link3Alt,'XData',[x2(n) x3Alt(n)],'YData',[y2(n) y3Alt(n)]);
+
+        set(link4Alt,'XData',[x0 x3Alt(n)],'YData',[y0 y3Alt(n)]);   %error in cases
     end
 
     end
