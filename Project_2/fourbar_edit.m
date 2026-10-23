@@ -76,7 +76,7 @@ end
 
 
 %% Creating Figure
-    figure('Position', [100, 100, 800, 800]) %makes the empty figure for the animation
+    figure('Position', [100, 100, 1800, 800]) %makes the empty figure for the animation
     clf %clears figure if this function is run multiple times in a row
     set(gcf, 'Color', '#D3E2E8'); %makes the background blue
 
@@ -87,7 +87,7 @@ end
 
     rad_frame = speed / fps; %rads per frame, replaces astep
 
-    theta2 = 0:rad_frame:n*2*pi; %start:step:end notation, 0-3 full rotations, in steps of size astep      
+    theta2 = theta0:rad_frame:(n*2*pi)+theta0; %start:step:end notation, 0-3 full rotations, in steps of size astep      
 
     timestep = 1/fps; % fps inverted gives seconds per frame
     time = theta2 ./ speed; %ARRAY, (results in a time value in seconds for plotting angles)
@@ -136,7 +136,7 @@ y1 = 0;
 
 %theta array                
 %thetaValues = theta0 + (0:2*pi*n);
-%disp(thetaValues)
+%disp(thetaValues
 
 %link 2 free end coordinates
 x2 = x1 + (r2*cos(theta2));
@@ -145,17 +145,17 @@ y2 = r2*sin(theta2);
 
 %span
 span = sqrt((r1^2 + r2^2) + (2*r1*r2*cos(theta2)));
-%disp(span)
+disp(span)
 
 %phi
 phi = acos(((r4^2+r3^2)-span.^2)/(2*r3*r4)); %Will be the same for both orientations
 %disp(((r4^2+r3^2)-span.^2)/(2*r3*r4))
-%disp(phi)
+disp(phi)
 
 %alpha and alphaALT
-alpha = (asin(r2.*sin(theta2)./span)) + (asin(r3.*sin(phi)./span));
-alphaALT = (asin(r2.*sin(theta2)./span)) - (asin(r3.*sin(phi)./span));
-%disp([alpha])
+alpha = (asin(r2.*sin(theta2)./span)) + (asin(r3.*sin(phi)./span)); %
+alphaALT = (asin(r2.*sin(theta2)./span)) - (asin(r3.*sin(phi)./span)); %change handling here 
+disp(alpha)
 
 %Link 4 free-end coordinates for both assembly orientations
 x3 = r4*cos(alpha);
@@ -166,12 +166,16 @@ y3Alt = r4*sin(alphaALT);
 
 
 %% plotting initial frame of orientation 1
-ax1 = subplot(3, 1, [1 2]); %subplot for the animation, 2 rows, 1 column, editing subplot 1
+ax1 = subplot(1, 2, 1); %subplot for the animation, 2 rows, 1 column, editing subplot 1
 hold on %allows everything here to be added to same figure
 
 % TODO set titles here
 
 % TODO set axes limits here
+
+
+% Setting reasonable axes
+   axis equal % sets axes to equal
 
     %TODO define xmin, xmax, ymin, ymax
     xmin = 1.2*min([x0 min(x3)]); %120% safety margin on leftmost position of link 4
@@ -193,10 +197,14 @@ hold on %allows everything here to be added to same figure
     
     hold off
 
-    %alternate orientation
-    ax2 = subplot(3, 1, 3); %subplot for the animation, 3 rows, 1 column, editing subplot 3
-    hold on %allows everything here to be added to same figure
-    
+%alternate orientation
+ax2 = subplot(1, 2, 2); %subplot for the animation, 3 rows, 1 column, editing subplot 3
+hold on %allows everything here to be added to same figure
+
+
+% Setting reasonable axes
+   axis equal % sets axes to equal
+
     %TODO define xmin, xmax, ymin, ymax
     xminAlt = 1.2*min([x0 min(x3Alt)]); %120% safety margin on leftmost position of link 4
     xmaxAlt = 1.2*max(x2); %120% safety margin on rightmost position of link 2
