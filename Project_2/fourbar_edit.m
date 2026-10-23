@@ -26,6 +26,8 @@ link_lengths = [r1,r2,r3,r4];
 link_sum = sum(link_lengths);
 
 %Check if any of the link lengths are greater than the sum of the other
+
+
 %links
 for i = 1:4
     if link_lengths(i) >= link_sum - link_lengths(i)
@@ -73,10 +75,8 @@ else
 end
 
 
-
-
 %% Creating Figure
-    figure('Position', [100, 100, 1800, 800]) %makes the empty figure for the animation
+    figure('Position', [100, 100, 1200, 600]) %makes the empty figure for the animation
     clf %clears figure if this function is run multiple times in a row
     set(gcf, 'Color', '#D3E2E8'); %makes the background blue
 
@@ -94,16 +94,7 @@ end
 
 %% Calculating link positions
 
-%{
-Variable legend:
-
-SCALAR
-
-
-ARRAY
-
-
-%}
+%   Variable legend:
 % SCALARS ----------------------------------------------------------------------------
 %{
 r1
@@ -132,12 +123,6 @@ y0 = 0;
 x1 = r1;
 y1 = 0;
 
-%disp(theta0)
-
-%theta array                
-%thetaValues = theta0 + (0:2*pi*n);
-%disp(thetaValues
-
 %link 2 free end coordinates
 x2 = x1 + (r2*cos(theta2));
 y2 = r2*sin(theta2);
@@ -150,6 +135,7 @@ y2 = r2*sin(theta2);
 span = sqrt((r1^2 + r2^2) + (2*r1*r2*cos(theta2))); %uses 
 %disp(span)
 
+
 % find unit vector from 0-p2 aka of span: 
 % p2/span = p2_unit_vec
 x2_unit_vec = x2 ./span;
@@ -157,12 +143,14 @@ y2_unit_vec = y2 ./span;
 
 %calculate b4 (b4 should be an array of scalar magnitudes)
 %since r3^2 - (span-b4)^2 = r4^2 -b4^2:
-b4 = (r3^2 - r4^2 - span.^2)/(-2 .* span);
+b4 = (r3^2 - r4^2 - span.^ 2) ./ (-2 .* span);
+
 
 %calculate h_34 (the height shared by the 2 right triangles if you cut the span-r3-r4 triangle in half normal from span)
 %pythagoras to find h, which is the shared height between the 2 right angle
 %
-h_34 = sqrt(r4^2 - b4 .^2);
+%h_34 = sqrt(r4^2 - b4 .^2);
+h_34 = sqrt(max(0, r4^2 - b4.^2)); %avoids rounding
 
 %finding temp point that is on span that is where the split is
 x_temp = b4 .* x2_unit_vec;
@@ -176,12 +164,9 @@ y2_norm_vec = x2_unit_vec;
 x3 = (h_34 .* x2_norm_vec) + x_temp;
 y3 = (h_34 .* y2_norm_vec) + y_temp;
 
-
 %these need the normal vector to be inverted, so using negatives
 x3Alt = (h_34 .* -x2_norm_vec) + x_temp;
 y3Alt = (h_34 .* -y2_norm_vec) + y_temp;
-
-
 
 
 % b4 * p2_unit_vec = x_temp, y_temp (coordinates of p temp) 
@@ -218,19 +203,24 @@ hold on %allows everything here to be added to same figure
 
 
 % Setting reasonable axes
-   axis equal % sets axes to equal
+   %axis equal % sets axes to equal
+   %daspect([1 1 1]);
 
     %TODO define xmin, xmax, ymin, ymax
-    xmin = 1.2*min([x0 min(x3)]); %120% safety margin on leftmost position of link 4
-    xmax = 1.2*max(x2); %120% safety margin on rightmost position of link 2
+    xmin = 1.2 * min([x0 min(x2) min(x2) min(x3Alt)]); %120% safety margin on leftmost position of link 4
+    xmax = 1.2 * max([max(x2) max(x2) max(x3Alt)]); %120% safety margin on rightmost position of link 2
+   
     if xmin == 0 %Manually sets bound if x0 is the min
         xmin = -(xmax-(r1+r2));
     end
+    
     %disp([xmin xmax])
-    ymin = 1.2*min([min(y2) min(y3)]); %120% safety margin on highest position of link 2 or link 4
-    ymax = 1.2*max([max(y2) max(y3)]); %120% safety margin on lowest position of link 2 or link 
+    ymin = 1.2*min([min(y2) min(y3) min(y3Alt)]); %120% safety margin on highest position of link 2 or link 4
+    ymax = 1.2*max([max(y2) max(y3) max(y3Alt)]); %120% safety margin on lowest position of link 2 or link 
+    
     xlim([xmin, xmax]);
     ylim([ymin, ymax]);
+    daspect([1 1 1]);
 
     % plot object handles for orientation 1
     link4 = plot([x0 x3(1)],[y0 y3(1)],'-o','linewidth',2, 'Color', 'r'); %plot obejct for rocker arm, spans from p0-p3
@@ -244,21 +234,23 @@ hold on %allows everything here to be added to same figure
 ax2 = subplot(1, 2, 2); %subplot for the animation, 3 rows, 1 column, editing subplot 3
 hold on %allows everything here to be added to same figure
 
-
 % Setting reasonable axes
-   axis equal % sets axes to equal
-
+   %axis equal % sets axes to equal
+   
     %TODO define xmin, xmax, ymin, ymax
-    xminAlt = 1.2*min([x0 min(x3Alt)]); %120% safety margin on leftmost position of link 4
-    xmaxAlt = 1.2*max(x2); %120% safety margin on rightmost position of link 2
-    if xminAlt == 0 %Manually sets bound if x0 is the min
-        xminAlt = -(xmax-(r1+r2));
-    end
+    %xminAlt = 1.2*min([x0 min(x3Alt)]); %120% safety margin on leftmost position of link 4
+    %xmaxAlt = 1.2*max(x2); %120% safety margin on rightmost position of link 2
+    %if xminAlt == 0 %Manually sets bound if x0 is the min
+    %    xminAlt = -(xmax-(r1+r2));
+    %end
     %disp([xmin xmax])
-    yminAlt = 1.2*min([min(y2) min(y3Alt)]); %150% safety margin on highest position of link 2 or link 4
-    ymaxAlt = 1.2*max([max(y2) max(y3Alt)]); %150% safety margin on lowest position of link 2 or link 
-    xlim([xminAlt, xmaxAlt]);
-    ylim([yminAlt, ymaxAlt]);
+    %yminAlt = 1.2*min([min(y2) min(y3Alt)]); %150% safety margin on highest position of link 2 or link 4
+    %ymaxAlt = 1.2*max([max(y2) max(y3Alt)]); %150% safety margin on lowest position of link 2 or link 
+
+    xlim([xmin, xmax]); % same axes as left plot
+    ylim([ymin, ymax]);
+    daspect([1 1 1]);
+
 
     %plot object handles for orientation 2
     ground = line([0 r1],[0 0],'linewidth', 2,'color','#0C8A11','LineStyle', '--'); %plot object for ground, does not need updating per frame
@@ -289,6 +281,10 @@ hold off
         set(link3Alt,'XData',[x2(n) x3Alt(n)],'YData',[y2(n) y3Alt(n)]);
 
         set(link4Alt,'XData',[x0 x3Alt(n)],'YData',[y0 y3Alt(n)]);   %error in cases
+
+        %disp(span(n))
+        %disp(b4(n))
+
     end
 
     end
