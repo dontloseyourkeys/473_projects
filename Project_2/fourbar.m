@@ -1,4 +1,4 @@
-function fourbar(r1,r2,r3,r4,theta,speed,n)
+function fourbar(r1,r2,r3,r4,theta0,speed,n)
 %% Function Details
 %{
 TODO explain function here
@@ -20,6 +20,7 @@ Animate both possible assemblies of links 3 and 4 simultaneously in separate fig
 The speed of the displayed animation should accurately reflect the input speed value. This can be done by computing all of the mechanism positions to be plotted (for both solutions) and storing them in a matrix prior to executing any plotting commands. The pause() function can be used to pause between plot updates for the correct amount of time (which depends on the angle step size you choose).
 
 %}
+close all
 
 link_lengths = [r1,r2,r3,r4];
 link_sum = sum(link_lengths);
@@ -99,12 +100,10 @@ comment form
 
     rad_frame = speed / fps; %rads per frame, replaces astep
 
-    %theta = 0:rad_frame:num_rotations*2*pi; %start:step:end notation, 0-3 full rotations, in steps of size astep      
+    thetaRange = 0:rad_frame:n*2*pi; %start:step:end notation, 0-3 full rotations, in steps of size astep      
 
     timestep = 1/fps; % fps inverted gives seconds per frame
-    time = theta ./ speed; %ARRAY, (results in a time value in seconds for plotting angles)
-
-
+    time = thetaRange ./ speed; %ARRAY, (results in a time value in seconds for plotting angles)
 
 %% Calculating link positions
 
@@ -147,7 +146,7 @@ x1 = r1;
 y1 = 0;
 
 %theta array
-thetaValues = theta + (0:2*pi*n) ;
+thetaValues = theta0 + (0:2*pi*n);
 
 %link 2 free end coordinates
 x2 = x1 + (r2*cos(thetaValues));
@@ -196,15 +195,21 @@ hold off
 pause(1)    %added 1s pause to better show initial frame and allow data to load
 hold off
 
-%% frame updates 
-
-    for n = 2:length(theta)
+%% Frame updates
+            
+    for n = 2:length(thetaValues)
         pause(timestep) %shows previous frame for timestep length
+                
+        %sets objects to next position
+        set(link4,'XData',[x0 x3(n)],'YData',[y0 y3(n)]);   %error in cases
+        %disp([ x3(n) y3(n) x4 y4(n) ] )
+        %disp([r4 x4-x3(n) (r4>x4-x3(n))])
+            
         
-
-        %objects update:
-        %set(objectHandle,'XData',[xstart ymiddle xend],'YData',[ystart ymiddle yend]);
-        %%syntax, can add more points in square brackets 
-      
+        set(link2,'XData',[x1 x2(n)],'YData',[y1 y2(n)]);
+        %set(phi_mark, 'XData', time(n), 'YData', phi(n));
+            
+        set(link3,'XData',[x2(n) x3(n)],'YData',[y2(n) y3(n)]);
+    end
 
     end
