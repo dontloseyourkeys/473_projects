@@ -1,4 +1,4 @@
-function fourbar(r1,r2,r3,r4,theta0,speed,n)
+function fourbar_edit(r1,r2,r3,r4,theta0,speed,n)
 %% Function Details
 %{
 TODO explain function here
@@ -143,27 +143,70 @@ x2 = x1 + (r2*cos(theta2));
 y2 = r2*sin(theta2);
 %disp([x2 y2])
 
+
+%change handling
+
 %span
-span = sqrt((r1^2 + r2^2) + (2*r1*r2*cos(theta2)));
-disp(span)
+span = sqrt((r1^2 + r2^2) + (2*r1*r2*cos(theta2))); %uses 
+%disp(span)
 
-%phi
-phi = acos(((r4^2+r3^2)-span.^2)/(2*r3*r4)); %Will be the same for both orientations
-%disp(((r4^2+r3^2)-span.^2)/(2*r3*r4))
-disp(phi)
+% find unit vector from 0-p2 aka of span: 
+% p2/span = p2_unit_vec
+x2_unit_vec = x2 ./span;
+y2_unit_vec = y2 ./span;
 
-%alpha and alphaALT
-alpha = (asin(r2.*sin(theta2)./span)) + (asin(r3.*sin(phi)./span)); %
-alphaALT = (asin(r2.*sin(theta2)./span)) - (asin(r3.*sin(phi)./span)); %change handling here 
-disp(alpha)
+%calculate b4 (b4 should be an array of scalar magnitudes)
+%since r3^2 - (span-b4)^2 = r4^2 -b4^2:
+b4 = (r3^2 - r4^2 - span.^2)/(-2 .* span);
 
-%Link 4 free-end coordinates for both assembly orientations
-x3 = r4*cos(alpha);
-y3 = r4*sin(alpha);
-x3Alt = r4*cos(alphaALT);
-y3Alt = r4*sin(alphaALT);
+%calculate h_34 (the height shared by the 2 right triangles if you cut the span-r3-r4 triangle in half normal from span)
+%pythagoras to find h, which is the shared height between the 2 right angle
+%
+h_34 = sqrt(r4^2 - b4 .^2);
+
+%finding temp point that is on span that is where the split is
+x_temp = b4 .* x2_unit_vec;
+y_temp = b4 .* y2_unit_vec;
 
 
+%rotating unit vector to be 90deg from span in both directions
+x2_norm_vec = -y2_unit_vec;
+y2_norm_vec = x2_unit_vec;
+
+x3 = (h_34 .* x2_norm_vec) + x_temp;
+y3 = (h_34 .* y2_norm_vec) + y_temp;
+
+
+%these need the normal vector to be inverted, so using negatives
+x3Alt = (h_34 .* -x2_norm_vec) + x_temp;
+y3Alt = (h_34 .* -y2_norm_vec) + y_temp;
+
+
+
+
+% b4 * p2_unit_vec = x_temp, y_temp (coordinates of p temp) 
+
+% find unit vector normal to span from p4 in both directions, multiply by
+% height for both points 
+
+%{
+    %phi
+    phi = acos(((r4^2+r3^2)-span.^2)/(2*r3*r4)); %Will be the same for both orientations
+    %disp(((r4^2+r3^2)-span.^2)/(2*r3*r4))
+    disp(phi)
+    
+    %alpha and alphaALT
+    alpha = (asin(r2.*sin(theta2)./span)) + (asin(r3.*sin(phi)./span)); %
+    alphaALT = (asin(r2.*sin(theta2)./span)) - (asin(r3.*sin(phi)./span)); %change handling here 
+    disp(alpha)
+    
+    %Link 4 free-end coordinates for both assembly orientations
+    x3 = r4*cos(alpha);
+    y3 = r4*sin(alpha);
+    x3Alt = r4*cos(alphaALT);
+    y3Alt = r4*sin(alphaALT);
+
+%}
 
 %% plotting initial frame of orientation 1
 ax1 = subplot(1, 2, 1); %subplot for the animation, 2 rows, 1 column, editing subplot 1
