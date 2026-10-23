@@ -19,7 +19,6 @@ speed is the constant angular speed of link 2 in rad/s CCW.
 Animate both possible assemblies of links 3 and 4 simultaneously in separate figure windows. Include short comments in your code explaining what each line does.
 The speed of the displayed animation should accurately reflect the input speed value. This can be done by computing all of the mechanism positions to be plotted (for both solutions) and storing them in a matrix prior to executing any plotting commands. The pause() function can be used to pause between plot updates for the correct amount of time (which depends on the angle step size you choose).
 
-
 %}
 
 link_lengths = [r1,r2,r3,r4];
@@ -71,8 +70,8 @@ else
     fprintf('Shorten the link of length %.2f. to less than %.2f\n', spql(4), spql(3))
 end
 
-%{
-thetaValues = theta + (0:2*pi*n) ;
+
+
 
 %% Creating Figure
     figure('Position', [100, 100, 800, 800]) %makes the empty figure for the animation
@@ -120,14 +119,56 @@ ARRAY
 
 %}
 % SCALARS ----------------------------------------------------------------------------
-
-
-
+%{
+r1
+r2
+r3
+r4
+speed
+ground coordinates x0, y0 and x1, y1
+%}
 % ARRAYS ----------------------------------------------------------------------------    
+%{
+theta
+phi (angle between links 3 and 4, may need to do separate calculations for
+the 2 orientations of r3 and r4)
+alpha (angle of link 4)
+alphaALT (angle of link 4 in second orientation)
+span (3rd side of triangle made by links 1 and 2)
+link 2 free end coordinates x2, y2
+link 4 free end coordinates for each orienation
+x3, y3, x3ALT, y3ALT
+%}
+
+%Calculations
+%ground coordinates
+x0 = 0;
+y0 = 0;
+x1 = r1;
+y1 = 0;
+
+
+%theta array
+thetaValues = theta + (0:2*pi*n) ;
+%link 2 free end coorindates
+x2 = x1 + r2*cos(thetaValues);
+y2 = r2*sin(thetaValues);
+%span
+span = r1^2 + r2^2 - 2*r1*r2*cos(thetaValues);
+%phi
+phi = acos((span^2-r4^2-r3^2)/(2*r3*r4)); %Will be the same for both orientations
+%alpha and alphaALT
+alpha = asin(r2*sin(thetaValues)/span) + asin(r3*sin(phi)/span);
+alphaALT = asin(r2*sin(thetaValues)/span) - asin(r3*sin(phi)/span);
+%Link 4 free-end coordinates for both assembly orientations
+x3 = r4*cos(alpha);
+y3 = r4*sin(alpha);
+x3Alt = r4*cos(alphaALT);
+y3Alt = r4*sin(alphaALT);
 
 
 %% plotting initial frame
-
+ax1 = subplot(3, 1, [1 2]); %subplot for the animation, 2 rows, 1 column, editing subplot 1
 hold on %allows everything here to be added to same figure
 
 % TODO set titles here
@@ -165,5 +206,5 @@ hold off
         %set(objectHandle,'XData',[xstart ymiddle xend],'YData',[ystart ymiddle yend]);
         %%syntax, can add more points in square brackets 
       
-%}
+
     end
