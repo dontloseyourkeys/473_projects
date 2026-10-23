@@ -181,7 +181,10 @@ hold on %allows everything here to be added to same figure
 % TODO set axes limits here
 
     %TODO define xmin, xmax, ymin, ymax
-    xmin = 1.2*min(x3); %120% safety margin on leftmost position of link 4
+    xmin = 1.2*min([x0 min(x3)]); %120% safety margin on leftmost position of link 4
+    if xmin == 0 %Manually sets bound if x0 is the min
+        xmin = -1.5;
+    end
     xmax = 1.2*max(x2); %120% safety margin on rightmost position of link 2
     %disp([xmin xmax])
     ymin = 1.2*min([min(y2) min(y3)]); %120% safety margin on highest position of link 2 or link 4
