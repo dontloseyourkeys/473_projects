@@ -27,13 +27,12 @@ link_sum = sum(link_lengths);
 
 %Check if any of the link lengths are greater than the sum of the other
 
-
 %links
 for i = 1:4
     if link_lengths(i) >= link_sum - link_lengths(i)
         %Print associated error message and fix
         fprintf(['A mechanism can not be assembled from the provided link lengths.\n' ...
-        'Please reduce the length of link %d to less than %.2f\n'], (i), sum(link_lengths) - link_lengths(i));
+        'Please reduce the length of link %d to less than %.2f\n\n'], (i), sum(link_lengths) - link_lengths(i));
         %Create the empty graph
         title('Mechanism can not be assembled. See command window.');
         pause(5);
@@ -49,29 +48,34 @@ if spql(1) + spql(4) < spql(2) + spql(3)
     %Classify the mechanism
     if r1 == spql(1)
         fprintf('This is a double-crank.\n')
-        fprintf('The provided lengths are acceptable.\n')
+        fprintf('The provided lengths are acceptable.\n\n')
+
     elseif r2 == spql(1)
         fprintf('This is a crank-rocker with r2 as the crank.\n')
-        fprintf('The provided lengths are acceptable.\n')
+        fprintf('The provided lengths are acceptable.\n\n')
+
     else
         %An undesired mechanism results from the provided lengths
         if r3 == spql(1)
             fprintf('This is a double rocker.\n')
-            fprintf('Increase r3 to more than %.2f.\n', spql(2))
+            fprintf('Increase r3 to more than %.2f.\n\n', spql(2))
         else 
             fprintf('This is a crank rocker with r4 as the crank.\n.')
-            fprintf('Increase r4 to more than %.2f.\n', spql(2))
+            fprintf('Increase r4 to more than %.2f.\n\n', spql(2))
         end
     end
+
 else
     %An undesired mechanism results from the provided lengths
     %These ones will throw complex number errors
     if spql(1) + spql(4) == spql(2) + spql(3)
-        fprintf('This is a change point mechanism.\n')
+        fprintf('This is a change point mechanism.\n\n')
+
     else
-        fprintf('This is a triple rocker.\n')
+        fprintf('This is a triple rocker.\n\n')
+
     end
-    fprintf('Shorten the link of length %.2f. to less than %.2f\n', spql(4), spql(3))
+    fprintf('Shorten the link of length %.2f. to less than %.2f\n\n', spql(4), spql(3))
 end
 
 
@@ -80,15 +84,11 @@ end
     clf %clears figure if this function is run multiple times in a row
     set(gcf, 'Color', '#D3E2E8'); %makes the background blue
 
-
 %% creating frames for animation 
 
     fps = 60; %frames per second [frames/second]
-
     rad_frame = speed / fps; %rads per frame, replaces astep
-
     theta2 = theta0:rad_frame:(n*2*pi)+theta0; %start:step:end notation, 0-3 full rotations, in steps of size astep      
-
     timestep = 1/fps; % fps inverted gives seconds per frame
     time = theta2 ./ speed; %ARRAY, (results in a time value in seconds for plotting angles)
 
@@ -123,18 +123,12 @@ y0 = 0;
 x1 = r1;
 y1 = 0;
 
-%link 2 free end coordinates
+%link 2 free end coordinates (crank tip)
 x2 = x1 + (r2*cos(theta2));
 y2 = r2*sin(theta2);
-%disp([x2 y2])
 
-
-%change handling
-
-%span
-span = sqrt((r1^2 + r2^2) + (2*r1*r2*cos(theta2))); %uses 
-%disp(span)
-
+%span is magnitude of distance from origin to p2, cuts the 4bar mech into 2 triangles
+span = sqrt((r1^2 + r2^2) + (2*r1*r2*cos(theta2)));
 
 % find unit vector from 0-p2 aka of span: 
 % p2/span = p2_unit_vec
@@ -145,14 +139,23 @@ y2_unit_vec = y2 ./span;
 %since r3^2 - (span-b4)^2 = r4^2 -b4^2:
 b4 = (r3^2 - r4^2 - span.^ 2) ./ (-2 .* span);
 
+% b4 * p2_unit_vec = x_temp, y_temp (coordinates of p temp) 
+
+% find unit vector normal to span from p4 in both directions, multiply by
+% height for both points 
+
 
 %calculate h_34 (the height shared by the 2 right triangles if you cut the span-r3-r4 triangle in half normal from span)
 %pythagoras to find h, which is the shared height between the 2 right angle
-%
+%triangles with hypotenuses r4 and r3. b4 is base of triangle bound by r4
+%and h_34
+
 %h_34 = sqrt(r4^2 - b4 .^2);
 h_34 = sqrt(max(0, r4^2 - b4.^2)); %avoids rounding
 
-%finding temp point that is on span that is where the split is
+
+
+%finding temp point that is on span that is where the 2 right triangle split is
 x_temp = b4 .* x2_unit_vec;
 y_temp = b4 .* y2_unit_vec;
 
@@ -161,63 +164,39 @@ y_temp = b4 .* y2_unit_vec;
 x2_norm_vec = -y2_unit_vec;
 y2_norm_vec = x2_unit_vec;
 
+%plots vector point from P_temp to p3, 
 x3 = (h_34 .* x2_norm_vec) + x_temp;
 y3 = (h_34 .* y2_norm_vec) + y_temp;
 
-%these need the normal vector to be inverted, so using negatives
+%these need the normal vector to be inverted, so using negatives of the
+%above
 x3Alt = (h_34 .* -x2_norm_vec) + x_temp;
 y3Alt = (h_34 .* -y2_norm_vec) + y_temp;
 
 
-% b4 * p2_unit_vec = x_temp, y_temp (coordinates of p temp) 
-
-% find unit vector normal to span from p4 in both directions, multiply by
-% height for both points 
-
-%{
-    %phi
-    phi = acos(((r4^2+r3^2)-span.^2)/(2*r3*r4)); %Will be the same for both orientations
-    %disp(((r4^2+r3^2)-span.^2)/(2*r3*r4))
-    disp(phi)
-    
-    %alpha and alphaALT
-    alpha = (asin(r2.*sin(theta2)./span)) + (asin(r3.*sin(phi)./span)); %
-    alphaALT = (asin(r2.*sin(theta2)./span)) - (asin(r3.*sin(phi)./span)); %change handling here 
-    disp(alpha)
-    
-    %Link 4 free-end coordinates for both assembly orientations
-    x3 = r4*cos(alpha);
-    y3 = r4*sin(alpha);
-    x3Alt = r4*cos(alphaALT);
-    y3Alt = r4*sin(alphaALT);
-
-%}
-
 %% plotting initial frame of orientation 1
-ax1 = subplot(1, 2, 1); %subplot for the animation, 2 rows, 1 column, editing subplot 1
-hold on %allows everything here to be added to same figure
 
 % TODO set titles here
 
-% TODO set axes limits here
+%if title = 
+ %set 
 
 
-% Setting reasonable axes
-   %axis equal % sets axes to equal
-   %daspect([1 1 1]);
+% Setting reasonable axes for both plots
+xmin = 1.2 * min([x0 min(x2) min(x2) min(x3Alt)]); %120% safety margin on leftmost position of link 4
+xmax = 1.2 * max([max(x2) max(x2) max(x3Alt)]); %120% safety margin on rightmost position of link 2
 
-    %TODO define xmin, xmax, ymin, ymax
-    xmin = 1.2 * min([x0 min(x2) min(x2) min(x3Alt)]); %120% safety margin on leftmost position of link 4
-    xmax = 1.2 * max([max(x2) max(x2) max(x3Alt)]); %120% safety margin on rightmost position of link 2
-   
-    if xmin == 0 %Manually sets bound if x0 is the min
-        xmin = -(xmax-(r1+r2));
-    end
-    
-    %disp([xmin xmax])
-    ymin = 1.2*min([min(y2) min(y3) min(y3Alt)]); %120% safety margin on highest position of link 2 or link 4
-    ymax = 1.2*max([max(y2) max(y3) max(y3Alt)]); %120% safety margin on lowest position of link 2 or link 
-    
+if xmin == 0 %Manually sets bound if x0 is the min
+    xmin = -(xmax-(r1+r2));
+end
+
+ymin = 1.2*min([min(y2) min(y3) min(y3Alt)]); %120% safety margin on highest position of link 2 or link 4
+ymax = 1.2*max([max(y2) max(y3) max(y3Alt)]); %120% safety margin on lowest position of link 2 or link 
+
+%% frame 1, left plot
+ax1 = subplot(1, 2, 1); %left subplot for the animation
+hold on %allows everything here to be added to same figure
+
     xlim([xmin, xmax]);
     ylim([ymin, ymax]);
     daspect([1 1 1]);
@@ -230,27 +209,14 @@ hold on %allows everything here to be added to same figure
     
     hold off
 
-%alternate orientation
-ax2 = subplot(1, 2, 2); %subplot for the animation, 3 rows, 1 column, editing subplot 3
+%% Frame 1, right plot (alternate orientation)
+ax2 = subplot(1, 2, 2); %right subplot for the animation
 hold on %allows everything here to be added to same figure
 
-% Setting reasonable axes
-   %axis equal % sets axes to equal
-   
-    %TODO define xmin, xmax, ymin, ymax
-    %xminAlt = 1.2*min([x0 min(x3Alt)]); %120% safety margin on leftmost position of link 4
-    %xmaxAlt = 1.2*max(x2); %120% safety margin on rightmost position of link 2
-    %if xminAlt == 0 %Manually sets bound if x0 is the min
-    %    xminAlt = -(xmax-(r1+r2));
-    %end
-    %disp([xmin xmax])
-    %yminAlt = 1.2*min([min(y2) min(y3Alt)]); %150% safety margin on highest position of link 2 or link 4
-    %ymaxAlt = 1.2*max([max(y2) max(y3Alt)]); %150% safety margin on lowest position of link 2 or link 
-
-    xlim([xmin, xmax]); % same axes as left plot
+    %axes limits reused from subplot 1
+    xlim([xmin, xmax]); 
     ylim([ymin, ymax]);
     daspect([1 1 1]);
-
 
     %plot object handles for orientation 2
     ground = line([0 r1],[0 0],'linewidth', 2,'color','#0C8A11','LineStyle', '--'); %plot object for ground, does not need updating per frame
@@ -261,7 +227,7 @@ hold on %allows everything here to be added to same figure
     hold off
 
 pause(1)    %added 1s pause to better show initial frame and allow data to load
-hold off
+
 
 %% Frame updates for both plots
             %TODO calculate seconds per frame right
@@ -272,7 +238,6 @@ hold off
         set(link4,'XData',[x0 x3(n)],'YData',[y0 y3(n)]);   %error in cases
         
         set(link2,'XData',[x1 x2(n)],'YData',[y1 y2(n)]);
-        %set(phi_mark, 'XData', time(n), 'YData', phi(n));
             
         set(link3,'XData',[x2(n) x3(n)],'YData',[y2(n) y3(n)]);
 
@@ -282,9 +247,6 @@ hold off
 
         set(link4Alt,'XData',[x0 x3Alt(n)],'YData',[y0 y3Alt(n)]);   %error in cases
 
-        %disp(span(n))
-        %disp(b4(n))
+    end %update end
 
-    end
-
-    end
+end %function end
