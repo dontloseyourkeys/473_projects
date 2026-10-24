@@ -1,16 +1,12 @@
 function fourbar_edit(r1,r2,r3,r4,theta0,speed,n)
 %% Function Details
-%{
-TODO explain function here
-%}
 
 %{
-D2L instructions:
-Write a function fourbar(r1,r2,r3,r4,theta,speed,n) that animates n cycles of a fourbar linkage if link 2 is a crank (i.e. can make a full rotation), and prints an error message otherwise.
 
-Assume that:
+This function fourbar(r1,r2,r3,r4,theta,speed,n) animates n cycles of a fourbar linkage if link 2 is a crank (i.e. can make a full rotation), and prints an error message otherwise.
+
 link 1 is fixed and horizontal, 
-link 2 is pinned to the right side of link 1, and 
+link 2 is pinned to the right side of link 1
 link 4 is pinned to the left side of link 1.  
 The link lengths are r1,r2,r3,r4; 
 theta is the initial angle of link 2, and 
@@ -20,15 +16,15 @@ Animate both possible assemblies of links 3 and 4 simultaneously in separate fig
 The speed of the displayed animation should accurately reflect the input speed value. This can be done by computing all of the mechanism positions to be plotted (for both solutions) and storing them in a matrix prior to executing any plotting commands. The pause() function can be used to pause between plot updates for the correct amount of time (which depends on the angle step size you choose).
 
 %}
-close all 
+close all %closes any windows that are open still
 
-link_lengths = [r1,r2,r3,r4];
-link_sum = sum(link_lengths);
+link_lengths = [r1,r2,r3,r4]; % for indexing thru the links
+link_sum = sum(link_lengths); 
 
 %Check if any of the link lengths are greater than the sum of the other
 
 %links
-for i = 1:4
+for i = 1:4     % for each link, checks whether that link is shorter than the sum of the rest
     if link_lengths(i) >= link_sum - link_lengths(i)
         %Print associated error message and fix
         fprintf(['A mechanism can not be assembled from the provided link lengths.\n' ...
@@ -81,7 +77,6 @@ else
     end
     fprintf('Shorten the link of length %.2f. to less than %.2f\n\n', spql(4), spql(3))
 end
-
 
 %% Creating Figure
     figure('Position', [100, 100, 1200, 600]) %makes the empty figure for the animation
@@ -178,12 +173,6 @@ y3Alt = (h_34 .* -y2_norm_vec) + y_temp;
 
 %% plotting initial frame of orientation 1
 
-% TODO set titles here
-
-
-
-
-
 % Setting reasonable axes for both plots
 xmin = 1.2 * min([x0 min(x2) min(x2) min(x3Alt)]); %120% safety margin on leftmost position of link 4
 xmax = 1.2 * max([max(x2) max(x2) max(x3Alt)]); %120% safety margin on rightmost position of link 2
@@ -199,20 +188,19 @@ ymax = 1.2*max([max(y2) max(y3) max(y3Alt)]); %120% safety margin on lowest posi
 ax1 = subplot(1, 2, 1); %left subplot for the animation
 hold on %allows everything here to be added to same figure
 
-graph_title
+% picks a title for the plots
 if graph_title == 1
-   title('double crank');
-
+   title('Double Crank: Assembly 1');
 
 elseif graph_title == 2
-   title('crank rocker');
+   title('Crank Rocker: Assembly 1');
 
 elseif graph_title ==3 
    title('Change link parameters: see console');
 
 end
 
-    xlim([xmin, xmax]);
+    xlim([xmin, xmax]); %limits for left plot
     ylim([ymin, ymax]);
     daspect([1 1 1]);
 
@@ -230,18 +218,18 @@ ax2 = subplot(1, 2, 2); %right subplot for the animation
 hold on %allows everything here to be added to same figure
 
 if graph_title == 1
-   title('double crank inversion');
+   title('Double Crank: Assembly 2');
 
 
 elseif graph_title == 2
-   title('crank rocker inversion');
+   title('Crank Rocker: Assembly 2');
 
-elseif graph_title ==3 
+elseif graph_title == 3 
    title('Change link parameters: see console');
 
 end
 
-    %axes limits reused from subplot 1
+    %axes limits reused for both
     xlim([xmin, xmax]); 
     ylim([ymin, ymax]);
     daspect([1 1 1]);
@@ -258,7 +246,7 @@ pause(1)    %added 1s pause to better show initial frame and allow data to load
 
 
 %% Frame updates for both plots
-            %TODO calculate seconds per frame right
+     
     for n = 2:length(theta2)
         pause(timestep) %shows previous frame for timestep length
                 
