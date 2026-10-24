@@ -74,7 +74,7 @@ else
     %An undesired mechanism results from the provided lengths
     %These ones will throw complex number errors
     if spql(1) + spql(4) == spql(2) + spql(3)
-        fprintf('This is a change point mechanism.\n')
+        fprintf('This is a change point mechanism.\n\n')
         graph_title = 4; % changepoint
         %fprintf('Shorten the link of length %.2f to less than %.2f\n\n', spql(4), spql(3)) %TODO is this needed if changepoint works?
     else
@@ -187,7 +187,7 @@ xmin = (1.2 * min([x0 min(x2) min(x2) min(x3Alt)])); %120% safety margin on left
 xmax =(1.2 * max([max(x2) max(x2) max(x3Alt)])); %120% safety margin on rightmost position of link 2
 
 if xmin < 1 %Manually sets bound if x0 is the min
-    xmin = xmin - 0.5
+    xmin = xmin - 0.5;
 end
 
 ymin = 1.2*min([min(y2) min(y3) min(y3Alt)]); %120% safety margin on highest position of link 2 or link 4
