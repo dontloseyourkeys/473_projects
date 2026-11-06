@@ -1,4 +1,29 @@
-function flat(beta1, beta2, beta3, beta4, speed, L, R0)
+function P3_Beard_Hall(beta1, beta2, beta3, beta4, speed, L, R0)
+%% Function Description
+%{
+has the form:
+[R0min, Wmin] = flat(beta1, beta2, beta3, beta4, speed, L, R0)
+
+Input:
+[m]     R0min:  is the minimum base circle radius,
+
+[RAD]   beta1:  the angular distance spent on the dwell
+[RAD]   beta2:  the angular distance (in radians) spent on the rise
+[RAD]   beta3:  the angular distance (in radians) spent on the dwell
+[RAD]   beta4:  the angular distance (in radians) spent on fall (respectively)
+
+[RAD/s] speed:  the rotational speed of the cam 
+[m]     L:      the lift (stroke) of the follower
+[m]     R0:     the base circle radius.
+
+Output: 
+[]      R0min:   
+[]      Wmin:  
+
+
+%}
+
+
 
 %% Function Instructions:
 %{
@@ -34,6 +59,9 @@ Your code must return the minimum base radius and minimum follower width as outp
 The animation should be clear, and the file name should be P4_name1_name2.m.
 %}
 
+%% Code starts here
+
+
 close all %closes any windows that are open still
 
 
@@ -65,6 +93,25 @@ close all %closes any windows that are open still
 
 %% plotting initial frame of orientation 1
 
+    
+    % Setting reasonable axes
+    
+    %limits
+    xlim([xmin, xmax]); 
+    ylim([ymin, ymax]);
+    daspect([1 1 1]);
+    
+    
 
-% Setting reasonable axes
+
+%% Frame updates
+
+    for n = 2:length(theta2)
+        pause(timestep) %shows previous frame for timestep length
+
+
+    end %update end
+
+end %function end
+
 
