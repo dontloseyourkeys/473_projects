@@ -33,3 +33,38 @@ knife.m plots graphs of the displacement and velocity of the follower. Your func
 Your code must return the minimum base radius and minimum follower width as outputs.
 The animation should be clear, and the file name should be P4_name1_name2.m.
 %}
+
+close all %closes any windows that are open still
+
+
+%% compatibility checks
+
+
+
+%% Creating Figure
+
+
+
+%%  Calculating positions
+
+% Variable legend:
+%{
+% SCALARS ----------------------------------------------------------------------------
+
+% ARRAYS ----------------------------------------------------------------------------   
+
+
+%}
+
+
+% Calculations
+
+
+
+
+
+%% plotting initial frame of orientation 1
+
+
+% Setting reasonable axes
+
