@@ -1,4 +1,4 @@
-function [R0min, Wmin] = test(beta1, beta2, beta3, beta4, speed, L, R0)
+function [R0min, Wmin] = testing(beta1, beta2, beta3, beta4, speed, L, R0)
 
 %% Function Instructions:
 %{
@@ -116,7 +116,7 @@ s(length(theta))=0;
 R_c = exp(-1i*theta).*(x + 1i*(R0+y));
 
 %plot cam angles for one revolution
-plot(theta,x,theta,y)
+%plot(theta,x,theta,y)
 %determine minimum base radius
 R0min = -min((y+a));
 
@@ -135,40 +135,24 @@ hold on
 % Plot the cam
 cam = plot(real(R_c),imag(R_c),'linewidth',2);
 
-% Plot the knife-edge. Generally, you don't want your mechanism to go
+% Plot the follower. Generally, you don't want your mechanism to go
 % off-screen, but for the follower, it's implied to be attached to
 % something, so it makes sense that it does.
-follow = patch([-0.05*L -0.05*L 0 0.05*L 0.05*L],[R0+1.5*L R0+y(1)+0.5*L ...
-    R0+y(1) R0+y(1)+0.5*L R0+1.5*L],[0.8 0.8 0.8]);
+follow = rectangle('Position',[min(x) R0 Wmin 0.2*L],'linewidth',2); % plot follower
+hold off
 
 % Always make sure your axes are sensible
 axis equal
 axis([-R0-1.5*L R0+1.5*L -R0-1.5*L R0+1.5*L])
 
-rotnum = 3; % Rotating 3 times
+rotnum = 1; % Rotating 3 times
 for a = 1:rotnum % for each rotation
-    for b = 1:length(theta) % for each angle
+    for b = theta % for each angle
         % Pause a moment
         pause(stepsize/speed)
         
         % Rotate the cam a little, and move the follower
-        set(cam,'XData',real(exp(1i*theta(b))*R_c),'YData',imag(exp(1i*theta(b))*R_c));
-        set(follow, 'YData',[R0+1.5*L R0+y(b)+0.5*L R0+y(b) R0+y(b)+0.5*L R0+1.5*L]);
+        set(cam,'XData',real(exp(1i*b)*R_c),'YData',imag(exp(1i*b)*R_c));
+        set(follow,'Position',[min(x) R0+L/2*(1-cos(b)) Wmin 0.2*L]); % slide follower
     end
 end
-
-
-%% Plot position and speed
-figure(2)
-
-subplot(2,1,1)
-plot(theta,y)
-axis([0 2*pi -0.1*L 1.1*L])
-title('Figure 1: Follower Displacement and speed vs. Cam Angle')
-ylabel('Displacement')
-
-subplot(2,1,2)
-plot(theta,s)
-axis([0 2*pi -1.2*max(abs(s)) 1.2*max(abs(s))])
-ylabel('Speed')
-xlabel('Cam Angle (Radians)')
