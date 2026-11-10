@@ -1,5 +1,9 @@
 function [R0min, Wmin] = testing(beta1, beta2, beta3, beta4, speed, L, R0)
 
+%valid test cases:
+%[R,W] = testing(1, 2, 1, 2, 1, 3, 2)
+%[R,W] = testing(1, 2, 0.5, 2.5, 1, 3, 1)
+
 %% Function Instructions:
 %{
 The example file knife.m takes a series of inputs, 
@@ -81,24 +85,25 @@ theta2 = 0:stepsize:beta2-stepsize;
 
 y = [y (L/2)*(1-cos(pi*theta2/beta2))];
 x = [x (L/2)*(pi/beta2)*sin(pi*theta2/beta2)]; %x = y'
+s = [s (L/2)*(pi/beta2)*sin(pi*theta2/beta2)*speed]; %y' * theta'
 a = [a (L/2)*(pi/beta2)^2*cos(pi*theta2/beta2)]; %y''
-s = [s (L*pi/(2*(beta2))*sin(pi*theta2/beta2))*speed]; %y' * theta'
 
 % Dwell 2
 theta3 = 0:stepsize:beta3-stepsize;
 
 y = [y L*ones(size(theta3))]; % During this dwell, it'll stay at y-L.
 x = [x zeros(size(theta3))]; % Zero displacement means 0 speed
+s = [s zeros(size(theta3))]; % During any dwell, the speed should be 0.
 a = [a zeros(size(theta3))]; 
-s = [s zeros(size(theta3))];  % During any dwell, the speed should be 0.
 
 % Cycloidal Motion (fall):
 theta4 = 0:stepsize:beta4-stepsize;
 
 y = [y (L - L*theta4/beta4 + (L/(2*pi)) * sin(2*pi*theta4/beta4))];
 x = [s (L/beta4)*(cos(2*pi*theta4/beta4)-1)]; % x = y'
-a = [a -(L*2*pi)/(beta4)^2*sin((2*pi*theta4)/beta4)]; %y'', may be wrong
 s = [s (L/beta4)*(cos(2*pi*theta4/beta4)-1)*speed];
+a = [a -(L*2*pi)/(beta4)^2*sin(2*pi*theta4/beta4)]; %y''
+
 
 % Dwell 3
 % Now we want to fill the rest of the vectors y and s with zeros so that
@@ -118,7 +123,7 @@ R_c = exp(-1i*theta).*(x + 1i*(R0+y));
 %plot cam angles for one revolution
 %plot(theta,x,theta,y)
 %determine minimum base radius
-R0min = -min((y+a));
+R0min = -(min(y)+min(a));
 
 %determine minimum follower width
 Wmin = max(x)-min(x);
@@ -145,14 +150,17 @@ hold off
 axis equal
 axis([-R0-1.5*L R0+1.5*L -R0-1.5*L R0+1.5*L])
 
-rotnum = 1; % Rotating 3 times
+
+rotnum = 3; % Rotating 1 time
 for a = 1:rotnum % for each rotation
+    n = 1; %for tracking y positions
     for b = theta % for each angle
         % Pause a moment
         pause(stepsize/speed)
         
         % Rotate the cam a little, and move the follower
         set(cam,'XData',real(exp(1i*b)*R_c),'YData',imag(exp(1i*b)*R_c));
-        set(follow,'Position',[min(x) R0+L/2*(1-cos(b)) Wmin 0.2*L]); % slide follower
+        set(follow,'Position',[min(x) R0+y(n) Wmin 0.2*L]); % slide follower
+        n = n + 1;
     end
 end
