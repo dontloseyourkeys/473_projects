@@ -68,10 +68,12 @@ close all %closes any windows that are open still
 
 
 
+%{
 %% Creating Figure
     figure('Position', [100, 100, 1200, 600]) %makes the empty figure for the animation
     clf %clears figure if this function is run multiple times in a row
     set(gcf, 'Color', '#D3E2E8'); %makes the background blue
+%}
 
 %{ 
 creating frames for animation 
@@ -185,7 +187,7 @@ a: second derivative of y
 % Output Calculations
 
     %minimum base radius
-    R0min = -(min(y)+min(a));
+    R0min = -(min(y+a));
 
     %minimum width
     Wmin = max(x)-min(x);
