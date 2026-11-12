@@ -1,11 +1,11 @@
-function P3_Beard_Hall(beta1, beta2, beta3, beta4, speed, L, R0)
+function [R0min, Wmin] = P3_Beard_Hall(beta1, beta2, beta3, beta4, speed, L, R0)
 %% Function Description
 %{
 has the form:
 [R0min, Wmin] = flat(beta1, beta2, beta3, beta4, speed, L, R0)
 
 Input:
-[m]     R0min:  is the minimum base circle radius,
+[m]     R0:  is the minimum base circle radius,
 
 [RAD]   beta1:  the angular distance spent on the dwell
 [RAD]   beta2:  the angular distance (in radians) spent on the rise
@@ -21,8 +21,6 @@ Output:
 [m]      Wmin:  the minimum follower width to allow the follower to always make contact
 
 %}
-
-
 
 %% Function Instructions:
 %{
@@ -57,8 +55,6 @@ knife.m plots graphs of the displacement and velocity of the follower. Your func
 Your code must return the minimum base radius and minimum follower width as outputs.
 The animation should be clear, and the file name should be P4_name1_name2.m.
 
-
-
 our notes: 
 similar to ps4 q6 and q7
 
@@ -66,9 +62,7 @@ similar to ps4 q6 and q7
 
 %% Code starts here
 
-
 close all %closes any windows that are open still
-
 
 %% compatibility checks
 
@@ -79,13 +73,15 @@ close all %closes any windows that are open still
     clf %clears figure if this function is run multiple times in a row
     set(gcf, 'Color', '#D3E2E8'); %makes the background blue
 
-%% creating frames for animation 
+%{ 
+creating frames for animation 
 
     fps = 60; %frames per second [frames/second]
     rad_frame = speed / fps; %rads per frame, replaces astep
     theta2 = theta0:rad_frame:(n*2*pi)+theta0; %start:step:end notation, 0-3 full rotations, in steps of size astep      
     timestep = 1/fps; % fps inverted gives seconds per frame
     time = theta2 ./ speed; %ARRAY, (results in a time value in seconds for plotting angles)
+%}
 
 %%  Calculating positions
 
@@ -110,51 +106,125 @@ Outputs:
 
 % ARRAYS ----------------------------------------------------------------------------   
 
-
-
+theta: range of angles for cam rotation
+y: follower displacement
+x: derivative of y
+s: speed of follower, x*theta'
+a: second derivative of y
 
 %}
 
-
 % Plotting Calculations
+
+    % Initialize variables: 
+    stepsize = 0.02;
+
+    theta = 0:stepsize:2*pi;
+    y = []; % Follower displacement
+    x = []; % Contact point coordinates, y'
+    s = []; % Speed of follower displacement
+    a = []; % second derivative of displacement, y''
+
+    % Dwell 1
+
+    %range of angluar positions between 0 and beta1
+    theta1 = 0:stepsize:beta1-stepsize; 
+    
+    %Set the kinematic quantites equal to 0 at each angular position in theta1
+    y = [y zeros(size(theta1))];
+    x = [x zeros(size(theta1))];
+    s = [s zeros(size(theta1))];
+    a = [a zeros(size(theta1))];
+
+    % Harmonic Motion (rise)
+
+    %range of angluar positions between beta1 and beta2
+    theta2 = 0:stepsize:beta2-stepsize;
+    
+    %Calculate the kinematic quantities at each angular position in theta2
+    y = [y (L/2)*(1-cos(pi*theta2/beta2))];
+    x = [x (L/2)*(pi/beta2)*sin(pi*theta2/beta2)]; %x = y'
+    s = [s (L/2)*(pi/beta2)*sin(pi*theta2/beta2)*speed]; %y' * theta'
+    a = [a (L/2)*(pi/beta2)^2*cos(pi*theta2/beta2)]; %y''
+
+    % Dwell 2
+    
+    %range of angluar positions between beta2 and beta3
+    theta3 = 0:stepsize:beta3-stepsize;
+    
+    %Set the kinematic quantites equal to L or 0 at each angular position in
+    %theta3
+    y = [y L*ones(size(theta3))]; % During this dwell, it'll stay at L.
+    x = [x zeros(size(theta3))]; % Zero displacement means 0 speed
+    s = [s zeros(size(theta3))]; % During any dwell, the speed should be 0.
+    a = [a zeros(size(theta3))]; %seocnd derivative is equal to 0 if first is
+
+    % Cycloidal Motion (fall):
+
+    %range of angluar positions between beta3 and beta4
+    theta4 = 0:stepsize:beta4-stepsize;
+    
+    %Calculate the kinematic quantities at each angular position in theta4
+    y = [y (L - L*theta4/beta4 + (L/(2*pi)) * sin(2*pi*theta4/beta4))];
+    x = [s (L/beta4)*(cos(2*pi*theta4/beta4)-1)]; % x = y'
+    s = [s (L/beta4)*(cos(2*pi*theta4/beta4)-1)*speed];
+    a = [a -(L*2*pi)/(beta4)^2*sin(2*pi*theta4/beta4)]; %y''
+
+    % Dwell 3
+    
+    % Fill the rest of the arrayss with zeros so that the arrays correspond
+    % to a full rotation of 2 pi rads
+    y(length(theta))=0;
+    x(length(theta))=0;
+    a(length(theta))=0;
+    s(length(theta))=0;
+
+    % Generate cam shape
+    R_c = exp(-1i*theta).*(x + 1i*(R0+y));
 
 % Output Calculations
 
+    %minimum base radius
+    R0min = -(min(y)+min(a));
 
+    %minimum width
+    Wmin = max(x)-min(x);
 
+%% Animation
 
+% Initial plot of cam
+figure(1)
 
-%% plotting initial frame of orientation 1
+%Plot the pivot point...
+plot(0,0,'ro') 
+hold on 
 
-    
-    % Setting reasonable axes
+% Plot the cam
+cam = plot(real(R_c),imag(R_c),'linewidth',2);
 
-   
-    
-    %xmin = 1.2 * (min["all x value arrays, space separated"])
-    %xmax = 1.2 * (max[       ])
+% Plot the follower
+follow = rectangle('Position',[min(x) R0 Wmin 0.2*L],'linewidth',2); % plot follower
+hold off
 
-    %ymin = 1.2 * (min[       ])
-    %ymax = 1.2 * (max[       ])
+% Set axis boundaries
+axis equal
+axis([-R0-1.5*L R0+1.5*L -R0-1.5*L R0+1.5*L])
 
-
-    % limits
-    xlim([xmin, xmax]); 
-    ylim([ymin, ymax]);
-    daspect([1 1 1]);
-    
-    
-
-
-%% Frame updates
-
-    for n = 2:length(theta2)
-        pause(timestep) %shows previous frame for timestep length
-
-
-
+rotnum = 3; % Set rotations
+for a = 1:rotnum % for each rotation
+    n = 1; %for tracking y positions
+    for b = theta % for each angular position
+        % Pause a moment
+        pause(stepsize/speed)
         
-    end %update end
+        % Rotate the cam
+        set(cam,'XData',real(exp(1i*b)*R_c),'YData',imag(exp(1i*b)*R_c));
+        % Show current follower position
+        set(follow,'Position',[min(x) R0+y(n) Wmin 0.2*L]);
+        % move to next follower position
+        n = n + 1;
+    end
+end
 
 end %function end
 
