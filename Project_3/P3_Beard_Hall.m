@@ -111,7 +111,6 @@ Outputs:
 theta: range of angles for cam rotation
 y: follower displacement
 x: derivative of y
-s: speed of follower, x*theta'
 a: second derivative of y
 
 %}
@@ -124,7 +123,6 @@ a: second derivative of y
     theta = 0:stepsize:2*pi;
     y = []; % Follower displacement
     x = []; % Contact point coordinates, y'
-    s = []; % Speed of follower displacement
     a = []; % second derivative of displacement, y''
 
     % Dwell 1
@@ -135,7 +133,6 @@ a: second derivative of y
     %Set the kinematic quantites equal to 0 at each angular position in theta1
     y = [y zeros(size(theta1))];
     x = [x zeros(size(theta1))];
-    s = [s zeros(size(theta1))];
     a = [a zeros(size(theta1))];
 
     % Harmonic Motion (rise)
@@ -146,7 +143,6 @@ a: second derivative of y
     %Calculate the kinematic quantities at each angular position in theta2
     y = [y (L/2)*(1-cos(pi*theta2/beta2))];
     x = [x (L/2)*(pi/beta2)*sin(pi*theta2/beta2)]; %x = y'
-    s = [s (L/2)*(pi/beta2)*sin(pi*theta2/beta2)*speed]; %y' * theta'
     a = [a (L/2)*(pi/beta2)^2*cos(pi*theta2/beta2)]; %y''
 
     % Dwell 2
@@ -158,7 +154,6 @@ a: second derivative of y
     %theta3
     y = [y L*ones(size(theta3))]; % During this dwell, it'll stay at L.
     x = [x zeros(size(theta3))]; % Zero displacement means 0 speed
-    s = [s zeros(size(theta3))]; % During any dwell, the speed should be 0.
     a = [a zeros(size(theta3))]; %seocnd derivative is equal to 0 if first is
 
     % Cycloidal Motion (fall):
@@ -169,7 +164,6 @@ a: second derivative of y
     %Calculate the kinematic quantities at each angular position in theta4
     y = [y (L - L*theta4/beta4 + (L/(2*pi)) * sin(2*pi*theta4/beta4))];
     x = [x (L/beta4)*(cos(2*pi*theta4/beta4)-1)]; % x = y'
-    s = [s (L/beta4)*(cos(2*pi*theta4/beta4)-1)*speed];
     a = [a -(L*2*pi)/(beta4)^2*sin(2*pi*theta4/beta4)]; %y''
 
     % Dwell 3
@@ -179,8 +173,7 @@ a: second derivative of y
     y(length(theta))=0;
     x(length(theta))=0;
     a(length(theta))=0;
-    s(length(theta))=0;
-
+    
     % Generate cam shape
     R_c = exp(-1i*theta).*(x + 1i*(R0+y));
 
