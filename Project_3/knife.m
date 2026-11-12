@@ -119,7 +119,7 @@ follow = patch([-0.05*L -0.05*L 0 0.05*L 0.05*L],[R0+1.5*L R0+y(1)+0.5*L ...
 axis equal
 axis([-R0-1.5*L R0+1.5*L -R0-1.5*L R0+1.5*L])
 
-rotnum = 3; % Rotating 3 times
+rotnum = 1; % Rotating 3 times
 for a = 1:rotnum % for each rotation
     for b = 1:length(theta) % for each angle
         % Pause a moment

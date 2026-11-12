@@ -168,7 +168,7 @@ a: second derivative of y
     
     %Calculate the kinematic quantities at each angular position in theta4
     y = [y (L - L*theta4/beta4 + (L/(2*pi)) * sin(2*pi*theta4/beta4))];
-    x = [s (L/beta4)*(cos(2*pi*theta4/beta4)-1)]; % x = y'
+    x = [x (L/beta4)*(cos(2*pi*theta4/beta4)-1)]; % x = y'
     s = [s (L/beta4)*(cos(2*pi*theta4/beta4)-1)*speed];
     a = [a -(L*2*pi)/(beta4)^2*sin(2*pi*theta4/beta4)]; %y''
 
