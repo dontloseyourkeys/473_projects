@@ -180,10 +180,20 @@ a: second derivative of y
 % Output Calculations
 
     %minimum base radius
-    R0min = -(min(y+a));
+    R0min = round(-(min(y+a)),4);
 
     %minimum width
     Wmin = max(x)-min(x);
+
+
+%% checks
+
+    %minimum radius achieved?
+    if R0min > R0
+        fprintf(['\nInput base radius is smaller than the minimum base radius for avoiding cusping.\n' ...
+            'Increase R0 to at least %.4f\n'], R0min)
+        return
+    end
 
 %% Animation
 
