@@ -66,24 +66,36 @@ close all %closes any windows that are open still
 
 %% compatibility checks
 
+% check if beta inputs are positive
+invalid = false;
+if beta1<0 || beta2<0 || beta3<0 || beta4<0 
+    fprintf('\nAll beta Inputs must be positive\n');
+    invalid = true;
+end
 
+%check if rise and return intervals are non-zero values
+if beta2==0 || beta4==0 
+    fprintf('\nbeta2 and beta4 must be non-zero values\n');
+    invalid = true;
+end
 
-%{
-%% Creating Figure
-    figure('Position', [100, 100, 1200, 600]) %makes the empty figure for the animation
-    clf %clears figure if this function is run multiple times in a row
-    set(gcf, 'Color', '#D3E2E8'); %makes the background blue
-%}
+% check that beta inputs can fit on a physical cam
+if beta1 + beta2 + beta3 + beta4 > 2*pi
+    fprintf('\nBeta inputs must sum to less than 2 pi radians\n');
+    invalid = true;
+end
 
-%{ 
-creating frames for animation 
+% check that speed, L, and R0 are positive, non-zero values
+if speed <= 0 || L<=0 || R0<=0
+    fprintf('\nSpeed, L, and R0 must have non-zero values.\n');
+    invalid = true;
+end
 
-    fps = 60; %frames per second [frames/second]
-    rad_frame = speed / fps; %rads per frame, replaces astep
-    theta2 = theta0:rad_frame:(n*2*pi)+theta0; %start:step:end notation, 0-3 full rotations, in steps of size astep      
-    timestep = 1/fps; % fps inverted gives seconds per frame
-    time = theta2 ./ speed; %ARRAY, (results in a time value in seconds for plotting angles)
-%}
+if invalid == true
+    R0min = 0;
+    Wmin = 0;
+    return
+end
 
 %%  Calculating positions
 
@@ -192,7 +204,7 @@ a: second derivative of y
     if R0min > R0
         fprintf(['\nInput base radius is smaller than the minimum base radius for avoiding cusping.\n' ...
             'Increase R0 to at least %.4f\n'], R0min) 
-        return %stop the animation
+        return %prevent the animation from playing
     end
 
 %% Animation
