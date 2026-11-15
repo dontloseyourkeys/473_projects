@@ -191,8 +191,8 @@ a: second derivative of y
     %minimum radius achieved?
     if R0min > R0
         fprintf(['\nInput base radius is smaller than the minimum base radius for avoiding cusping.\n' ...
-            'Increase R0 to at least %.4f\n'], R0min)
-        return
+            'Increase R0 to at least %.4f\n'], R0min) 
+        return %stop the animation
     end
 
 %% Animation
