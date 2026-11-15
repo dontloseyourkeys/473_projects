@@ -81,7 +81,7 @@ end
 
 % check that beta inputs can fit on a physical cam
 if beta1 + beta2 + beta3 + beta4 > 2*pi
-    fprintf('\nBeta inputs must sum to less than 2 pi radians\n');
+    fprintf('\nBeta inputs must sum to 2 pi radians or less\n');
     invalid = true;
 end
 
