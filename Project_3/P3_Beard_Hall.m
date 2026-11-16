@@ -92,8 +92,8 @@ if speed <= 0 || L<=0 || R0<=0
 end
 
 if invalid == true
-    R0min = 0;
-    Wmin = 0;
+    R0min = -1;
+    Wmin = -1;
     return
 end
 
