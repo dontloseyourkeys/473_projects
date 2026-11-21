@@ -44,6 +44,8 @@ List of Topics and Sub-Modules for Project 4
 
 % grabbing mechanism
 
+% maybe some visual indicators of the initial and final positions
+
 %% position states and motion
 
 % default, link 1 pointing straight up and link 2 pointing straight down.
@@ -97,7 +99,7 @@ List of Topics and Sub-Modules for Project 4
     triangle (CCW relative to link 1 rather than the x axis?)
 %}
 
-%% Possible motion constraints
+%% Possible constraints
 %{
     1. Position of ends of link 1 and link 2 must always be in the first 2
     quadrants relative to the origin where link 1 attached to the ground
