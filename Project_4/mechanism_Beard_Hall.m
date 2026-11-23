@@ -1,14 +1,28 @@
-function [] = mechanism_Beard_Hall(initX, initY, finalX, finalY)
+function [] = mechanism_Beard_Hall(initX, initY, finalX, finalY, speed)
+%% Function Description
+%{
+This function mechanism_Beard_Hall takes inputs ______ and animates a
+hydraulic robotic claw arm that can move an object.
+
+
+initX, initY: the initial x and y positions for the object to be moved
+finalX, finalY: the position the object should be moved to.
+speed: the animation speed, rads/s of ___(whatever we consider the base link)____
+%}
+
+
+close all %closes any windows that are open still
 
 %mechanism_Beard_Hall(beta1, beta2, beta3, beta4, speed, L, R0)
 
 % TODO remove before submission but these are placeholders so we can easily
 % test
 if nargin < 4
-        initX = 6;
+        initX = 2;
         initY = 8;
-        finalX = -5;
-        finalY = 10;
+        finalX = 5;
+        finalY = 3;
+        speed = 2;
     end
 
 %TODO 
@@ -68,6 +82,28 @@ List of Topics and Sub-Modules for Project 4
 
 %% plot elements:
 
+    %{
+    variable legend: 
+    
+    Given inputs: 
+    initX, initY:   the initial x and y positions for the object to be moved
+    finalX, finalY: the position the object should be moved to.
+    speed:          the animation speed, rads/s of ___(whatever we consider the base link)____
+    
+        
+
+    Defined within function:
+
+    SCALAR  link1:  fixed length of link 1
+    SCALAR  link2:  fixed length of link 2
+    
+    SCALAR  x0, y0: (fixed origin of link 1)
+    
+
+    ARRAY: x1, y1 (end of link 1, changing) 
+
+    %}
+
 % ground, both for the mechanism and maybe the lower limit of where the
 % object can be moved to
 
@@ -85,11 +121,11 @@ List of Topics and Sub-Modules for Project 4
 
 % grabbing mechanism
 
-% maybe some visual indicators of the initial and final positions
+% maybe some visual indicators of the initial and final positions (we could have pale dotted objects represent these positions and have the object itself in a brighter solid line colour)
 
 %initialize fixed parameters
-link1 = 10;
-crank1 = link1*0.25;
+link1 = 10; 
+crank1 = link1*0.25; 
 crank1X = link1* 0.1; %X offset from origin
 link2 = 10;
 crank2 = link2*0.25;
@@ -108,7 +144,7 @@ if any([initX, finalX] < -maxReach | [initY, finalY] < 0) || ...
     error('Target coordinates must lie within the upper reachable semicircle.');
 end
 
-%default position
+%default position       %TODO are these for the moveable object?
 dPos = [0; link1 - link2];
 %initial position based on inputs
 
@@ -120,6 +156,20 @@ fPos = [finalX; finalY];
 
 % default, link 1 pointing straight up and link 2 pointing straight down.
 % angular positions can be hard coded
+
+
+%the origin (fixed side of link 1)
+x0 = 0;
+y0 = 0;
+
+%link 1 initial coordinates
+x1(1) = x0; %TODO PLACEHOLDERS change to depend on angle
+y1(1) = y0 + link1;
+
+%link 2 coordinates
+x2(1) = x1 + link2; %TODO PLACEHOLDERS change to depend on angle
+y2(1) = y1;
+
 
 % initial, moving free end of link 2 from default position to init
 % coordinates specified by user
@@ -134,7 +184,7 @@ fPos = [finalX; finalY];
 %% Default to init
     %1. Convert init coordinates to a position vector
     
-    iPos = [initX; initY];
+    iPos = [initX; initY]; %TODO not sure if we need this
     iPosLength = hypot(initX, initY);
     
     %{
@@ -211,6 +261,20 @@ fPos = [finalX; finalY];
 
 % 
 
+
+%moveable object parameters:
+radius = 2; 
+
+%params for current center position of the object TODO placeholder
+objX(1) = x2(1);% TODO Change to be the actual current position of the object instead of placeholders
+objY(1) = y2(1);%
+
+obj_pos = [objX - radius, objY - radius, 2*radius, 2*radius];
+
+
+
+
+
 %% Animations
 % TODO: move code below this up only when variables are needed further up
 
@@ -218,6 +282,60 @@ fPos = [finalX; finalY];
 % figure('Position', [100, 100, 1200, 600]) %makes the empty figure for the animation
     clf %clears figure if this function is run multiple times in a row
     set(gcf, 'Color', '#D3E2E8'); %makes the background blue
+
+
+ax1 = subplot(3, 1, [1 2]); %adds the plot, maybe leaving space for a text box at (2 1 2) that can explain ?
+hold on %allows everything here to be added to same figure
+
+title('Project 4: Placeholder Title');
+
+
+axis equal % sets axes to equal
+
+    % Initial frame
+    
+        %plot object handles
+            ground = line([(x0 -5) (x0+5)],[0 0],'linewidth', 2,'color','#0C8A11', 'LineStyle', '--'); %plot object for ground, does not need updating per frame
+
+            links = plot([x0 x1(1) x2(1)],[y0 y1(1) y2(1)],'-o','linewidth',2, 'Color', 'b'); %plot obejct for rocker arm, spans from p0-p3
+            
+            
+            m_object = rectangle('Position', obj_pos,...
+                 'Curvature', [1 1], 'FaceColor', 'b', 'EdgeColor', 'k', 'LineWidth', 1.5);
+    
+
+
+            % initial and final object positions: (should not move)
+             init_object = rectangle('Position', [initX - radius, initY - radius, 2*radius, 2*radius],...
+                 'Curvature', [1 1], 'FaceColor', 'w', 'EdgeColor', 'b', 'LineWidth', 1.5, 'LineStyle', '--');
+
+             final_object = rectangle('Position', [finalX - radius, finalY - radius, 2*radius, 2*radius],...
+                 'Curvature', [1 1], 'FaceColor', 'w', 'EdgeColor', 'b', 'LineWidth', 1.5, 'LineStyle', '--');
+
+            
+            % moveable object
+            m_object = rectangle('Position', obj_pos,...
+                 'Curvature', [1 1], 'FaceColor', 'b', 'EdgeColor', 'k', 'LineWidth', 1.5);
+
+
+    
+
+ ax2 = subplot(3, 1, 3); %text box
+
+
+        str = {'We can explain a bit about the function/the project here',... ...
+            'placeholder for line 2',...
+            'placeholder for line 3',...
+            };
+        
+        text(0.5, 0.5, str, ...
+            'HorizontalAlignment', 'center', ...
+            'VerticalAlignment', 'middle', ...
+            'FontSize', 12);
+                    
+        hold off
+
+                   
 
 %% creating frames for animation 
 
