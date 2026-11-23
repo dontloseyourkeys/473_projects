@@ -128,24 +128,32 @@ link1 = 10;
 pst1Link1 = link1*0.25; %point where piston 1 attaches to link 1 mesaured along link 1
 pst1Grnd = link1* 0.1; %point where piston 1 attaches to ground measured as distance from arm base
 link2 = 10;
-pst2Link2 = link2*0.25;%point where piston 2 attached to link 2 measured along link 2
-pst2Link1 = link1*0.1; %point where piston 2 attached to link 1 measured backwards along link 1
+pst2Link2 = link2*0.25; %point where piston 2 attaches to link 2 measured along link 2
+pst2Link1 = link1*0.1; %point where piston 2 attaches to link 1 measured backwards along link 1
 
 maxReach = link1 + link2; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
 
 %% Arrays containing default, initial, and final position data in that order
-%% Defualt position assumes link 1 points straight up and link 2 is at -pi/4 radians relative to positive x axis
+%% Hard coded defualt position assumes link 1 points straight up and link 2 
+%% is at -pi/4 radians relative to positive x axis
 %arrays for calulcations
 link1Ang = [pi/2, 0, 0];
-link2Ang = [-pi/4, 0, 0];
+link2Ang = [-pi/4, 0, 0]; %Won't get plotted but needed for calculations
 pst1Lgth = [sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(link1Ang(1))),0,0];
 pst2Lgth = [sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(link2Ang(1))),0,0];
-%arrays for plotting only, plot element angles relative to x axis
+%Angles that need to given relative to x axis fro plotting
 link2PLtAng = [-pi/4, 0, 0];
 pst1PltAng = [asin((pst1Link1*sin(link1Ang(1)))/pst1Lgth(1)),0,0];
 pst2PltAng = [(link1Ang(1) - asin((pst2Link2*sin(link2Ang(1)))/pst2Lgth(1))),0,0];
 
-%%other arrays
+%% Arrays to be filled with frame specific angle or length data based on 
+%% interpolation between values contained in the arrays above
+link1AnimAng = []; %Corresponds to link1Ang
+link2AnimAng = []; %Corresponds to link2PltAng
+pst1AnimLgth = []; %Corresponds to pst1Lgth
+pst2AnimLgth = []; %Corresponds to pst2Lgth
+pst1AnimAng = []; %Corresponds to pst1PltAng
+pst2AnimAng = []; %Corresponds to pst2PltAng
 
 %% position states and motion
 
@@ -204,9 +212,12 @@ y2(1) = y1;
     pst1PltAng(3) = asin((pst1Link1*sin(link1Ang(3)))/pst1Lgth(3));
     pst2PltAng(3) = (link1Ang(3) - asin((pst2Link2*sin(link2Ang(3)))/pst2Lgth(2))); %relative to positive x axis
   
-%% final back to default
+%% CREATING STATE TRANSISITIONS BETWEEN LENGTHS AND ANGLES FOR THE PLOT
+    %Default to initial
+    %initial to final
+    %final to default
 
-%% Possible constraints
+    %% Possible constraints
 %{
     1. Position of ends of link 1 and link 2 must always be in the first 2
     quadrants relative to the origin where link 1 attached to the ground
