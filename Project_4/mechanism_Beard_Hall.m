@@ -1,5 +1,16 @@
-<<<<<<< HEAD
-function [] = mechanism_Beard_Hall(beta1, beta2, beta3, beta4, speed, L, R0)
+function [] = mechanism_Beard_Hall(initX, initY, finalX, finalY)
+
+%mechanism_Beard_Hall(beta1, beta2, beta3, beta4, speed, L, R0)
+
+% TODO remove before submission but these are placeholders so we can easily
+% test
+if nargin < 4
+        initX = 6;
+        initY = 8;
+        finalX = -5;
+        finalY = 10;
+    end
+
 %TODO 
 %{ 
 TODO: add a paragraph explaining how to use the program, a 2 explaining 
@@ -17,10 +28,6 @@ Grades based off of:
 - good documentation
 
 =======
-function mechanism_Beard_Hall(initX, initY, finalX, finalY)
->>>>>>> 7107465352610293e9195448823fa9910df1dec3
-
-%{
 
 %}
 
@@ -46,9 +53,7 @@ List of Topics and Sub-Modules for Project 4
 
 %}
 
-<<<<<<< HEAD
-
-=======
+%=============================================================================
 %% inputs and constraints
 
     % initX and initY, coordinates for the object to be moved from
@@ -88,14 +93,14 @@ crank1 = link1*0.25;
 crank1X = link1* 0.1; %X offset from origin
 link2 = 10;
 crank2 = link2*0.25;
-crank2Offset = 0.1*link1; %will be a small distance from the end of link 1
+crank2offset = 0.1*link1; %will be a small distance from the end of link 1
 
 maxReach = link1 + link2;
 
 %arrays
 link1Angles = [pi/2, 0, 0]; %will contain default, init, and final positions
 link2Angles = [0, 0, 0];
-crank1Angles = [link1Angles(0) + asin(crank1X*sin(link1Angles(0))/crank1),0,0];
+crank1Angles = [link1Angles(1) + asin(crank1X*sin(link1Angles(1))/crank1),0,0];
 crank2Angles = [0,0,0]; %calculated relative to link 1 rather than ground?
 
 if any([initX, finalX] < -maxReach | [initY, finalY] < 0) || ...
@@ -128,8 +133,10 @@ fPos = [finalX; finalY];
 %% inverse kinematics pseudocode
 %% Default to init
     %1. Convert init coordinates to a position vector
+    
     iPos = [initX; initY];
-    iPosLength = hypot(iPos);
+    iPosLength = hypot(initX, initY);
+    
     %{
     2. Use cosine law and fixed link lengths to find the angles of the
     triangle made by the links and the position vector. WILL NEED TO
@@ -139,7 +146,7 @@ fPos = [finalX; finalY];
     adjacent to the ground to get an initial angular position for link 1
     %}
     %start with first quadrant only
-    link1Angles(2) = acos((link1^2 + iPosLength^2 - link2^2)/(2*link1*iPosLength)) + atan2(iPos);
+    link1Angles(2) = acos((link1^2 + iPosLength^2 - link2^2)/(2*link1*iPosLength)) + atan2(initX, initY);
     link2Angles(2) = acos((link1^2 + link2^2 - iPosLength^2)/(2*link1*link2));
     %{
     4. Relate initial position of link 1 to an initial position of crank 1 
@@ -199,5 +206,38 @@ fPos = [finalX; finalY];
 
 %maybe have link 2 extend so possible arm positions create a rectangular
 %field rather than a circular one?
-end
->>>>>>> 7107465352610293e9195448823fa9910df1dec3
+
+
+
+% 
+
+%% Animations
+% TODO: move code below this up only when variables are needed further up
+
+%% Creating Figure
+% figure('Position', [100, 100, 1200, 600]) %makes the empty figure for the animation
+    clf %clears figure if this function is run multiple times in a row
+    set(gcf, 'Color', '#D3E2E8'); %makes the background blue
+
+%% creating frames for animation 
+
+    fps = 60; %frames per second [frames/second]
+    rad_frame = speed / fps; %rads per frame, replaces astep
+    theta2 = theta0:rad_frame:(n*2*pi)+theta0; %start:step:end notation, 0-3 full rotations, in steps of size astep      
+    timestep = 1/fps; % fps inverted gives seconds per frame
+    time = theta2 ./ speed; %ARRAY, (results in a time value in seconds for plotting angles)
+
+
+%% Frame updates for both plots
+     
+    for n = 2:length(theta2)
+        pause(timestep) %shows previous frame for timestep length
+                
+        %sets objects to next position
+        %set(link4,'XData',[x0 x3(n)],'YData',[y0 y3(n)]);   %error in cases
+        
+  
+
+    end %update end
+
+end %function end
