@@ -124,39 +124,30 @@ List of Topics and Sub-Modules for Project 4
 % maybe some visual indicators of the initial and final positions (we could have pale dotted objects represent these positions and have the object itself in a brighter solid line colour)
 
 %initialize fixed parameters
-link1 = 10; 
-crank1 = link1*0.25; 
-crank1X = link1* 0.1; %X offset from origin
+link1 = 10;
+pst1Link1 = link1*0.25; %point where piston 1 attaches to link 1 mesaured along link 1
+pst1Grnd = link1* 0.1; %point where piston 1 attaches to ground measured as distance from arm base
 link2 = 10;
-crank2 = link2*0.25;
-crank2offset = 0.1*link1; %will be a small distance from the end of link 1
+pst2Link2 = link2*0.25;%point where piston 2 attached to link 2 measured along link 2
+pst2Link1 = link1*0.1; %point where piston 2 attached to link 1 measured backwards along link 1
 
-maxReach = link1 + link2;
+maxReach = link1 + link2; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
 
-%arrays
-link1Angles = [pi/2, 0, 0]; %will contain default, init, and final positions
-link2Angles = [0, 0, 0];
-crank1Angles = [link1Angles(1) + asin(crank1X*sin(link1Angles(1))/crank1),0,0];
-crank2Angles = [0,0,0]; %calculated relative to link 1 rather than ground?
+%% Arrays containing default, initial, and final position data in that order
+%% Defualt position assumes link 1 points straight up and link 2 is at -pi/4 radians relative to positive x axis
+%arrays for calulcations
+link1Ang = [pi/2, 0, 0];
+link2Ang = [-pi/4, 0, 0];
+pst1Lgth = [sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(link1Ang(1))),0,0];
+pst2Lgth = [sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(link2Ang(1))),0,0];
+%arrays for plotting only, plot element angles relative to x axis
+link2PLtAng = [-pi/4, 0, 0];
+pst1PltAng = [asin((pst1Link1*sin(link1Ang(1)))/pst1Lgth(1)),0,0];
+pst2PltAng = [(link1Ang(1) - asin((pst2Link2*sin(link2Ang(1)))/pst2Lgth(1))),0,0];
 
-if any([initX, finalX] < -maxReach | [initY, finalY] < 0) || ...
-        any(hypot([initX, finalX], [initY, finalY]) > maxReach)
-    error('Target coordinates must lie within the upper reachable semicircle.');
-end
-
-%default position       %TODO are these for the moveable object?
-dPos = [0; link1 - link2];
-%initial position based on inputs
-
-%final position based on inputs
-fPos = [finalX; finalY];
-
+%%other arrays
 
 %% position states and motion
-
-% default, link 1 pointing straight up and link 2 pointing straight down.
-% angular positions can be hard coded
-
 
 %the origin (fixed side of link 1)
 x0 = 0;
@@ -180,67 +171,40 @@ y2(1) = y1;
 % return to default position, go from final position back to default
 % position
 
-%% inverse kinematics pseudocode
-%% Default to init
-    %1. Convert init coordinates to a position vector
-    
-    iPos = [initX; initY]; %TODO not sure if we need this
-    iPosLength = hypot(initX, initY);
-    
-    %{
-    2. Use cosine law and fixed link lengths to find the angles of the
-    triangle made by the links and the position vector. WILL NEED TO
-    SPECIFY WHICH OF THE POSSIBLE TRIANGLES WILL BE USED BASED ON WHICH
-    SIDE OF THE MACHINE THIS POSITION IS ON. 
-    3. Get CCW angle between ground and position vector, and add triangle angle
-    adjacent to the ground to get an initial angular position for link 1
-    %}
-    %start with first quadrant only
-    link1Angles(2) = acos((link1^2 + iPosLength^2 - link2^2)/(2*link1*iPosLength)) + atan2(initX, initY);
-    link2Angles(2) = acos((link1^2 + link2^2 - iPosLength^2)/(2*link1*link2));
-    %{
-    4. Relate initial position of link 1 to an initial position of crank 1 
-    using ICs or trig or whatever causes the least problems
-    %}
-    %using sin law
-    crank1Angles(2) = link1Angles(2) + asin(crank1X*sin(link1Angles(2))/crank1);
-    crank2Angles(2) = link2Angles(2) + asin(crank2offset*sin(link2Angles(2))/crank2); %relative to link 1
-    %convert link 2 angular position to angle relative to positive x axis for plotting
-    link2PlotAngle = (link1Angles(2) - 180) + crank2Angles(2);
-    %{
-    5. Rotate crank 1 from the default position to the calculated initial
-    position while staying in quadrants 1
-    %}
-    %{
-    6. Rotate crank 2 from the default position to the angular position
-    associated with the angle between link 1 and 2 in the init position
-    triangle (measured CCW relative to link 1 rather than the x axis?)
-    %}
+%% Calculating initial and final position data (CURRENTLY FOR 1ST QUADRANT ONLY)
+%% initial position
+    %Convert init coordinates to a position vector
+    iPosLgth = hypot(initX, initY);
+    iPosAng = atan2(initX, initY);
+    %Calculate link angles from triangle made with init position vector
+    link1Ang(2) = acos((link1^2 + iPosLgth^2 - link2^2)/(2*link1*iPosLgth)) + iPosAng;
+    link2Ang(2) = acos((link1^2 + link2^2 - iPosLgth^2)/(2*link1*link2));
+    %Get the angle of link 2 relative to the positive x axis for plotting
+    lnk2PltAng(2) = (link1Ang(2) - 180) + link2Ang(2);
+    %Calculate piston lengths
+    pst1Lgth(2) = sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(link1Ang(2)));
+    pst2Lgth(2) = sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(link2Ang(2)));
+    %Calculate piston angles for plotting
+    pst1PltAng(2) = asin((pst1Link1*sin(link1Ang(2)))/pst1Lgth(2));
+    pst2PltAng(2) = (link1Ang(2) - asin((pst2Link2*sin(link2Ang(2)))/pst2Lgth(2))); %relative to positive x axis
 
-
-%% init to final
-%{
-    1. Convert final coordinates to a position vector
-    2. Use cosine law and fixed link lengths to find the angles of the
-    triangle made by the links and the final position vector. WILL NEED TO
-    SPECIFY WHICH OF THE POSSIBLE TRIANGLES WILL BE USED BASED ON WHICH
-    SIDE OF THE MACHINE THIS POSITION IS ON
-    3. Compare the resulting angles with those from init position
-    4. Relate final angular position of link 1 to an angular position of crank 1 
-    using ICs or trig or whatever causes the least problems
-    5. Rotate crank 1 from the init position to the final
-    position while staying in quadrants 1 and 2
-    6. Rotate crank 2 from the init position to the final position
-    associated with the angle between link 1 and 2 in the init position
-    triangle (CCW relative to link 1 rather than the x axis?)
-
+%% final position
+    %Convert init coordinates to a position vector
+    fPosLgth = hypot(finalX, finalY);
+    fPosAng = atan2(finalX, finalY);
+    %Calculate link angles from triangle made with init position vector
+    link1Ang(3) = acos((link1^2 + fPosLgth^2 - link2^2)/(2*link1*fPosLgth)) + fPosAng;
+    link2Ang(3) = acos((link1^2 + link2^2 - fPosLgth^2)/(2*link1*link2));
+    %Get the angle of link 2 relative to the positive x axis for plotting
+    link2PltAng(3) = (link1Ang(3) - 180) + link2Ang(3);
+    %Calculate piston lengths
+    pst1Lgth(3) = sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(link1Ang(3)));
+    pst2Lgth(3) = sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(link2Ang(3)));
+    %Calculate piston angles for plotting
+    pst1PltAng(3) = asin((pst1Link1*sin(link1Ang(3)))/pst1Lgth(3));
+    pst2PltAng(3) = (link1Ang(3) - asin((pst2Link2*sin(link2Ang(3)))/pst2Lgth(2))); %relative to positive x axis
+  
 %% final back to default
-    1. Rotate crank 1 from the final position to the default
-    position while staying in quadrants 1 and 2
-    2. Rotate crank 2 from the final position to the default position
-    associated with the angle between link 1 and 2 in the init position
-    triangle (CCW relative to link 1 rather than the x axis?)
-%}
 
 %% Possible constraints
 %{
