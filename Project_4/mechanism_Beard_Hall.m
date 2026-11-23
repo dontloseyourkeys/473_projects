@@ -13,6 +13,7 @@ The project grade will be based on originality, technical difficulty, execution,
 List of Topics and Sub-Modules for Project 4
 
 %}
+
 %% inputs and constraints
 
     % initX and initY, coordinates for the object to be moved from
@@ -46,6 +47,35 @@ List of Topics and Sub-Modules for Project 4
 
 % maybe some visual indicators of the initial and final positions
 
+%initialize fixed parameters
+link1 = 10;
+crank1 = link1*0.25;
+crank1X = link1* 0.1; %X offset from origin
+link2 = 10;
+crank2 = link2*0.25;
+crank2Offset = 0.1*link1; %will be a small distance from the end of link 1
+
+maxReach = link1 + link2;
+
+%arrays
+link1Angles = [pi/2, 0, 0]; %will contain default, init, and final positions
+link2Angles = [0, 0, 0];
+crank1Angles = [link1Angles(0) + asin(crank1X*sin(link1Angles(0))/crank1),0,0];
+crank2Angles = [0,0,0]; %calculated relative to link 1 rather than ground?
+
+if any([initX, finalX] < -maxReach | [initY, finalY] < 0) || ...
+        any(hypot([initX, finalX], [initY, finalY]) > maxReach)
+    error('Target coordinates must lie within the upper reachable semicircle.');
+end
+
+%default position
+dPos = [0; link1 - link2];
+%initial position based on inputs
+
+%final position based on inputs
+fPos = [finalX; finalY];
+
+
 %% position states and motion
 
 % default, link 1 pointing straight up and link 2 pointing straight down.
@@ -61,22 +91,39 @@ List of Topics and Sub-Modules for Project 4
 % position
 
 %% inverse kinematics pseudocode
-%{
 %% Default to init
-    1. Convert init coordinates to a position vector
+    %1. Convert init coordinates to a position vector
+    iPos = [initX; initY];
+    iPosLength = hypot(iPos);
+    %{
     2. Use cosine law and fixed link lengths to find the angles of the
     triangle made by the links and the position vector. WILL NEED TO
     SPECIFY WHICH OF THE POSSIBLE TRIANGLES WILL BE USED BASED ON WHICH
     SIDE OF THE MACHINE THIS POSITION IS ON. 
     3. Get CCW angle between ground and position vector, and add triangle angle
     adjacent to the ground to get an initial angular position for link 1
+    %}
+    %start with first quadrant only
+    link1Angles(2) = acos((link1^2 + iPosLength^2 - link2^2)/(2*link1*iPosLength)) + atan2(iPos);
+    link2Angles(2) = acos((link1^2 + link2^2 - iPosLength^2)/(2*link1*link2));
+    %{
     4. Relate initial position of link 1 to an initial position of crank 1 
     using ICs or trig or whatever causes the least problems
+    %}
+    %using sin law
+    crank1Angles(2) = link1Angles(2) + asin(crank1X*sin(link1Angles(2))/crank1);
+    crank2Angles(2) = link2Angles(2) + asin(crank2offset*sin(link2Angles(2))/crank2); %relative to link 1
+    %{
     5. Rotate crank 1 from the default position to the calculated initial
-    position while staying in quadrants 1 and 2
+    position while staying in quadrants 1
+    %}
+    %{
     6. Rotate crank 2 from the default position to the angular position
     associated with the angle between link 1 and 2 in the init position
     triangle (measured CCW relative to link 1 rather than the x axis?)
+    %}
+
+
 %% init to final
     1. Convert final coordinates to a position vector
     2. Use cosine law and fixed link lengths to find the angles of the
