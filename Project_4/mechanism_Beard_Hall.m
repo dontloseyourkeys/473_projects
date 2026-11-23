@@ -113,6 +113,8 @@ fPos = [finalX; finalY];
     %using sin law
     crank1Angles(2) = link1Angles(2) + asin(crank1X*sin(link1Angles(2))/crank1);
     crank2Angles(2) = link2Angles(2) + asin(crank2offset*sin(link2Angles(2))/crank2); %relative to link 1
+    %convert link 2 angular position to angle relative to positive x axis for plotting
+    link2PlotAngle = (link1Angles(2) - 180) + crank2Angles(2);
     %{
     5. Rotate crank 1 from the default position to the calculated initial
     position while staying in quadrants 1
@@ -125,6 +127,7 @@ fPos = [finalX; finalY];
 
 
 %% init to final
+%{
     1. Convert final coordinates to a position vector
     2. Use cosine law and fixed link lengths to find the angles of the
     triangle made by the links and the final position vector. WILL NEED TO
@@ -138,6 +141,7 @@ fPos = [finalX; finalY];
     6. Rotate crank 2 from the init position to the final position
     associated with the angle between link 1 and 2 in the init position
     triangle (CCW relative to link 1 rather than the x axis?)
+
 %% final back to default
     1. Rotate crank 1 from the final position to the default
     position while staying in quadrants 1 and 2
