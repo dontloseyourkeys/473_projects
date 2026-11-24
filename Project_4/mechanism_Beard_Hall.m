@@ -130,14 +130,19 @@ pst1Grnd = link1* 0.1; %point where piston 1 attaches to ground measured as dist
 link2 = 10;
 pst2Link2 = link2*0.25; %point where piston 2 attaches to link 2 measured along link 2
 pst2Link1 = link1*0.1; %point where piston 2 attaches to link 1 measured from elbow
+%% WILL NEED TO BE SUBTRACTED FROM LINK 1 TO GET RIGHT LENGTH FOR THE PLOT
 
 maxReach = link1 + link2; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
 
 %% Arrays, hard coded default position assumes link 1 points straight up and link 2 is at -pi/4 radians from + x axis
+%% for all arrays, first index is the piston or link number, and the second index is the specific position
+%% 1 = default position, 2 = initial position of object, 3 = final position
+
 %% Angles needed for calculating piston lengths
 linkAng = [[pi/2, 0, 0],[-pi/4, 0, 0]];
 %% Pistion lengths associated with default, initial, and final positions
-pstKeyFrames = [[sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,1))),0,0],[sqrt((link1 - pst2Link1)^2+pst2Link2^2-2*(link1 - pst2Link1)*pst2Link2*cos(linkAng(2,1))),0,0]];
+pstKeyFrames = [[sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,1))),0,0],[sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,1))),0,0]];
+
 %superfluous but keeping around just in case
 %{
 link2PltAng = [-pi/4, 0, 0];
@@ -219,38 +224,34 @@ y2(1) = y1;
 %% Interpolating between piston length keyframes
     %placeholder step size
     stepSize = 0.1;
-    
-    %Will need to interpolate the piston lengths, and calculate the other
-    %quantities frame by frame based on that for realistic motion.
-    
-    %initialize first frame for each piston
+
+    %% defualt to initial
+
+    %initialize the first frame for this motion
     pstPlotLgth(1,1) = pstKeyFrames(1,1);
     pstPlotLgth(2,1) = pstKeyFrames(1,1);
 
-    %Calculate total required frames based on steps needed to move between
-    %positions
-
-    %% defualt to initial
-    diTotal = max(abs((pst1KeyFrames(2) - pst1KeyFrames(1))/stepsize), abs((pst2KeyFrames(2) - pst2KeyFrames(1))/stepsize));
-    
-    %for tracking when pistons are done moving to the new position
-    pstDone = [false,false];
+    %Calculate total required frames based on which piston needs more steps
+    %to get into the new position
+    diTotal = max(abs((pstKeyFrames(1,2) - pstKeyFrames(1,1))/stepsize), abs((pstKeyFrames(2,2) - pstKeyFrames(2,1))/stepsize));
     
     %once for each piston
     for i = 1:2 
+        %for tracking when pistons are done moving to the new position
+        pstDone = false;
         %for determining whether to increase or decrease a piston
-        if pstKeyFrames(i,1) > pstKeyFrames(i,2) %Increase the value if initial is greater than default position
+        if pstKeyFrames(i,1) < pstKeyFrames(i,2) %Increase the value if initial is greater than default position
             sign = 1;
-        elseif pstKeyFrames(i,1) < pstKeyFrames(i,2) %decrease the value if initial is greater than default position
+        elseif pstKeyFrames(i,1) > pstKeyFrames(i,2) %decrease the value if initial is less than default position
             sign = -1;
         end
         %for each frame in the current motion
         for j = 2:diTotal
-            %If piston 1 isn't in its final position
-            if pstDone(i) == false
+            %If the current piston isn't in its final position
+            if pstDone == false
                 %change the position by the step size in the determined
                 %direction
-                pstPlotLgth(i,j) = pstPlotLgth(i,(i-j)) + stepSize*sign;
+                pstPlotLgth(i,j) = pstPlotLgth(i,(j-1)) + stepSize*sign;
             else
                 %set the current frame to the same position as the last
                 %frame
@@ -260,37 +261,96 @@ y2(1) = y1;
             %initial position
             if abs(pstPlotLgth(i,(i-1)) - pstKeyFrames(i,2)) < stepSize
                 %Stop moving this piston during this motion
-                pstDone(i) = true;
+                pstDone = true;
             end
         end
     end
 
-    %initial to final
-    ifTotal = max(abs((pst1KeyFrames(3) - pst1KeyFrames(2))/stepsize), abs((pst2KeyFrames(3) - pst2KeyFrames(2))/stepsize));
+    %% initial to final
     
+    %Calculate total required frames based on which piston needs more steps
+    %to get into the new position
+    ifTotal = max(abs((pstKeyFrames(1,3) - pstKeyFrames(1,2))/stepsize), abs((pstKeyFrames(2,3) - pstKeyFrames(2,2))/stepsize));
     
-    %final to default
-    fdTotal = max(abs((pst1KeyFrames(1) - pst1KeyFrames(3))/stepsize), abs((pst2KeyFrames(1) - pst2KeyFrames(3))/stepsize));
-    
-    total = diTotal + ifTotal + fdTotal;
-    
-    %populate piston length arrays
-    %defaul
-    for i = 1:total
-    
+    %once for each piston
+    for i = 1:2 
+        %for tracking when pistons are done moving to the new position
+        pstDone = false;
+        %for determining whether to increase or decrease a piston
+        if pstKeyFrames(i,2) < pstKeyFrames(i,3) %Increase the value if final is greater than initial position
+            sign = 1;
+        elseif pstKeyFrames(i,2) > pstKeyFrames(i,3) %decrease the value if final is less than initial position
+            sign = -1;
+        end
+        %for each frame in the current motion
+        for j = (diTotal + 1):ifTotal
+            %If the current piston isn't in its final position
+            if pstDone == false
+                %change the position by the step size in the determined
+                %direction
+                pstPlotLgth(i,j) = pstPlotLgth(i,(j-1)) + stepSize*sign;
+            else
+                %set the current frame to the same position as the last
+                %frame
+                pstPlotLgth(i,j) = pstPlotLgth(i,j-1);
+            end
+            %if current frame's position is within a step size of the
+            %initial position
+            if abs(pstPlotLgth(i,(i-1)) - pstKeyFrames(i,2)) < stepSize
+                %Stop moving this piston during this motion
+                pstDone = true;
+            end
+        end
     end
 
-    %Once interpolation is done, calculate frame i positions based on the piston lengths:
+    %% final back to default
 
-    for i = 1:total
-    pst1PlotAng(i) = acos((pst1Link1^2+pst1Grnd^2-pst1Lgth(i)^2)/(2*pst1Link1*pst1Grnd));
-    pst2PlotAng(i) = acos((pst2Link1^2+pst2Link2^2-pst2Lgth(i)^2)/(2*pst2Link1*pst2Link2));
-    link1PlotAng(i) = asin((pst1Lgth(i)*sin(pst1PlotAng(i)))/pst1Link1);
-    link2PlotAng(i) = (link1PlotAng(i) - 180) + asin((pst2Lgth(i)*sin(pst2PlotAng(i)))/pst2Link2);
+    %Calculate total required frames based on which piston needs more steps
+    %to get into the new position
+    fdTotal = max(abs((pstKeyFrames(1,1) - pstKeyFrames(1,3))/stepsize), abs((pstKeyFrames(2,1) - pstKeyFrames(2,3))/stepsize));
+    
+    %once for each piston
+    for i = 1:2 
+        %for tracking when pistons are done moving to the new position
+        pstDone = false;
+        %for determining whether to increase or decrease a piston
+        if pstKeyFrames(i,3) < pstKeyFrames(i,1) %Increase the value if default is greater than final position
+            sign = 1;
+        elseif pstKeyFrames(i,3) > pstKeyFrames(i,1) %decrease the value if default is less than final position
+            sign = -1;
+        end
+        %for each frame in the current motion
+        for j = (diTotal + ifTotal + 1):dfTotal
+            %If the current piston isn't in its final position
+            if pstDone == false
+                %change the position by the step size in the determined
+                %direction
+                pstPlotLgth(i,j) = pstPlotLgth(i,(j-1)) + stepSize*sign;
+            else
+                %set the current frame to the same position as the last
+                %frame
+                pstPlotLgth(i,j) = pstPlotLgth(i,j-1);
+            end
+            %if current frame's position is within a step size of the
+            %initial position
+            if abs(pstPlotLgth(i,(i-1)) - pstKeyFrames(i,2)) < stepSize
+                %Stop moving this piston during this motion
+                pstDone = true;
+            end
+        end
+    end
+
+    %Once interpolation is done, calculate frame i positions for everything else based on the piston lengths:
+
+    for i = 1:(diTotal + ifTotal + fdTotal)
+    pstPlotAng(1,i) = acos((pst1Link1^2+pst1Grnd^2-pstPlotLgth(1,i)^2)/(2*pst1Link1*pst1Grnd));
+    pstPlotAng(2,i) = acos((pst2Link1^2+pst2Link2^2-pstPlotLgth(2,i)^2)/(2*pst2Link1*pst2Link2));
+    linkPlotAng(1,i) = asin((pstPlotLgth(1,i)*sin(pstPlotAng(1,i)))/pst1Link1);
+    linkPlotAng(2,i) = (linkPlotAng(1,i) - 180) + asin((pst2Lgth(i)*sin(pstPlotAng(2,i)))/pst2Link2);
     end
     
 
-    %}
+    
     %% Possible constraints
 %{
     1. Position of ends of link 1 and link 2 must always be in the first 2
