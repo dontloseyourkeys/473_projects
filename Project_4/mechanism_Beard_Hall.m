@@ -222,7 +222,7 @@ y2(1) = y1;
     %}
   
 %% Interpolating between piston length keyframes
-    %placeholder step size
+    %placeholder step size for piston length change
     stepSize = 0.1;
 
     %% defualt to initial
@@ -348,8 +348,6 @@ y2(1) = y1;
     linkPlotAng(1,i) = asin((pstPlotLgth(1,i)*sin(pstPlotAng(1,i)))/pst1Link1);
     linkPlotAng(2,i) = (linkPlotAng(1,i) - 180) + asin((pst2Lgth(i)*sin(pstPlotAng(2,i)))/pst2Link2);
     end
-    
-
     
     %% Possible constraints
 %{
