@@ -125,35 +125,31 @@ List of Topics and Sub-Modules for Project 4
 
 %initialize fixed parameters
 link1 = 10;
-pst1Link1 = link1*0.25; %point where piston 1 attaches to link 1 mesaured along link 1
-pst1Grnd = link1* 0.1; %point where piston 1 attaches to ground measured as distance from arm base
+pst1Link1 = link1*0.25; %point where piston 1 attaches to link 1 mesaured from ground
+pst1Grnd = link1* 0.1; %point where piston 1 attaches to ground measured as distance from arm base/origin
 link2 = 10;
 pst2Link2 = link2*0.25; %point where piston 2 attaches to link 2 measured along link 2
-pst2Link1 = link1*0.1; %point where piston 2 attaches to link 1 measured backwards along link 1
+pst2Link1 = link1*0.1; %point where piston 2 attaches to link 1 measured from elbow
 
 maxReach = link1 + link2; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
 
-%% Arrays containing default, initial, and final position data in that order
-%% Hard coded defualt position assumes link 1 points straight up and link 2 
-%% is at -pi/4 radians relative to positive x axis
-%arrays for calulcations
-link1Ang = [pi/2, 0, 0];
-link2Ang = [-pi/4, 0, 0]; %Won't get plotted but needed for calculations
-pst1Lgth = [sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(link1Ang(1))),0,0];
-pst2Lgth = [sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(link2Ang(1))),0,0];
-%Angles that need to given relative to x axis fro plotting
-link2PLtAng = [-pi/4, 0, 0];
-pst1PltAng = [asin((pst1Link1*sin(link1Ang(1)))/pst1Lgth(1)),0,0];
-pst2PltAng = [(link1Ang(1) - asin((pst2Link2*sin(link2Ang(1)))/pst2Lgth(1))),0,0];
+%% Arrays, hard coded default position assumes link 1 points straight up and link 2 is at -pi/4 radians from + x axis
+%% Angles needed for calculating piston lengths
+linkAng = [[pi/2, 0, 0],[-pi/4, 0, 0]];
+%% Pistion lengths associated with default, initial, and final positions
+pstKeyFrames = [[sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,1))),0,0],[sqrt((link1 - pst2Link1)^2+pst2Link2^2-2*(link1 - pst2Link1)*pst2Link2*cos(linkAng(2,1))),0,0]];
+%superfluous but keeping around just in case
+%{
+link2PltAng = [-pi/4, 0, 0];
+pst1PltAng = [asin((pst1Link1*sin(link1Ang(1)))/pst1KeyFrames(1)),0,0];
+pst2PltAng = [(link1Ang(1) - asin((pst2Link2*sin(link2Ang(1)))/pst2KeyFrames(1))),0,0];
+%}
 
 %% Arrays to be filled with frame specific angle or length data based on 
 %% interpolation between values contained in the arrays above
-link1AnimAng = []; %Corresponds to link1Ang
-link2AnimAng = []; %Corresponds to link2PltAng
-pst1AnimLgth = []; %Corresponds to pst1Lgth
-pst2AnimLgth = []; %Corresponds to pst2Lgth
-pst1AnimAng = []; %Corresponds to pst1PltAng
-pst2AnimAng = []; %Corresponds to pst2PltAng
+linkPlotAng = zeros(2,0); %link angles
+pstPlotLgth = zeros(2,0); %piston lengths
+pstPlotAng = zeros(2,0); %piston angles
 
 %% position states and motion
 
@@ -185,38 +181,116 @@ y2(1) = y1;
     iPosLgth = hypot(initX, initY);
     iPosAng = atan2(initX, initY);
     %Calculate link angles from triangle made with init position vector
-    link1Ang(2) = acos((link1^2 + iPosLgth^2 - link2^2)/(2*link1*iPosLgth)) + iPosAng;
-    link2Ang(2) = acos((link1^2 + link2^2 - iPosLgth^2)/(2*link1*link2));
+    linkAng(1,2) = acos((link1^2 + iPosLgth^2 - link2^2)/(2*link1*iPosLgth)) + iPosAng;
+    linkAng(2,2) = acos((link1^2 + link2^2 - iPosLgth^2)/(2*link1*link2));
+    %Calculate piston lengths
+    pstKeyFrames(1,2) = sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,2)));
+    pstKeyFrames(2,2) = sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,2)));
+    
+    %superfluous but keeping around just in case
+    %{
     %Get the angle of link 2 relative to the positive x axis for plotting
     lnk2PltAng(2) = (link1Ang(2) - 180) + link2Ang(2);
-    %Calculate piston lengths
-    pst1Lgth(2) = sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(link1Ang(2)));
-    pst2Lgth(2) = sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(link2Ang(2)));
     %Calculate piston angles for plotting
-    pst1PltAng(2) = asin((pst1Link1*sin(link1Ang(2)))/pst1Lgth(2));
-    pst2PltAng(2) = (link1Ang(2) - asin((pst2Link2*sin(link2Ang(2)))/pst2Lgth(2))); %relative to positive x axis
+    pst1PltAng(2) = asin((pst1Link1*sin(link1Ang(2)))/pst1KeyFrames(2));
+    pst2PltAng(2) = (link1Ang(2) - asin((pst2Link2*sin(link2Ang(2)))/pst2KeyFrames(2))); %relative to positive x axis
+    %}
 
 %% final position
     %Convert init coordinates to a position vector
     fPosLgth = hypot(finalX, finalY);
     fPosAng = atan2(finalX, finalY);
     %Calculate link angles from triangle made with init position vector
-    link1Ang(3) = acos((link1^2 + fPosLgth^2 - link2^2)/(2*link1*fPosLgth)) + fPosAng;
-    link2Ang(3) = acos((link1^2 + link2^2 - fPosLgth^2)/(2*link1*link2));
+    linkAng(1,3) = acos((link1^2 + fPosLgth^2 - link2^2)/(2*link1*fPosLgth)) + fPosAng;
+    linkAng(2,3) = acos((link1^2 + link2^2 - fPosLgth^2)/(2*link1*link2));
+    %Calculate piston lengths
+    pstKeyFrames(1,3) = sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,3)));
+    pstKeyFrames(2,3) = sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,3)));
+    
+    %superfluous but want to keep around just in case
+    %{
     %Get the angle of link 2 relative to the positive x axis for plotting
     link2PltAng(3) = (link1Ang(3) - 180) + link2Ang(3);
-    %Calculate piston lengths
-    pst1Lgth(3) = sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(link1Ang(3)));
-    pst2Lgth(3) = sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(link2Ang(3)));
     %Calculate piston angles for plotting
-    pst1PltAng(3) = asin((pst1Link1*sin(link1Ang(3)))/pst1Lgth(3));
-    pst2PltAng(3) = (link1Ang(3) - asin((pst2Link2*sin(link2Ang(3)))/pst2Lgth(2))); %relative to positive x axis
+    pst1PltAng(3) = asin((pst1Link1*sin(link1Ang(3)))/pst1KeyFrames(3));
+    pst2PltAng(3) = (link1Ang(3) - asin((pst2Link2*sin(link2Ang(3)))/pst2KeyFrames(2))); %relative to positive x axis
+    %}
   
-%% CREATING STATE TRANSISITIONS BETWEEN LENGTHS AND ANGLES FOR THE PLOT
-    %Default to initial
-    %initial to final
-    %final to default
+%% Interpolating between piston length keyframes
+    %placeholder step size
+    stepSize = 0.1;
+    
+    %Will need to interpolate the piston lengths, and calculate the other
+    %quantities frame by frame based on that for realistic motion.
+    
+    %initialize first frame for each piston
+    pstPlotLgth(1,1) = pstKeyFrames(1,1);
+    pstPlotLgth(2,1) = pstKeyFrames(1,1);
 
+    %Calculate total required frames based on steps needed to move between
+    %positions
+
+    %% defualt to initial
+    diTotal = max(abs((pst1KeyFrames(2) - pst1KeyFrames(1))/stepsize), abs((pst2KeyFrames(2) - pst2KeyFrames(1))/stepsize));
+    
+    %for tracking when pistons are done moving to the new position
+    pstDone = [false,false];
+    
+    %once for each piston
+    for i = 1:2 
+        %for determining whether to increase or decrease a piston
+        if pstKeyFrames(i,1) > pstKeyFrames(i,2) %Increase the value if initial is greater than default position
+            sign = 1;
+        elseif pstKeyFrames(i,1) < pstKeyFrames(i,2) %decrease the value if initial is greater than default position
+            sign = -1;
+        end
+        %for each frame in the current motion
+        for j = 2:diTotal
+            %If piston 1 isn't in its final position
+            if pstDone(i) == false
+                %change the position by the step size in the determined
+                %direction
+                pstPlotLgth(i,j) = pstPlotLgth(i,(i-j)) + stepSize*sign;
+            else
+                %set the current frame to the same position as the last
+                %frame
+                pstPlotLgth(i,j) = pstPlotLgth(i,j-1);
+            end
+            %if current frame's position is within a step size of the
+            %initial position
+            if abs(pstPlotLgth(i,(i-1)) - pstKeyFrames(i,2)) < stepSize
+                %Stop moving this piston during this motion
+                pstDone(i) = true;
+            end
+        end
+    end
+
+    %initial to final
+    ifTotal = max(abs((pst1KeyFrames(3) - pst1KeyFrames(2))/stepsize), abs((pst2KeyFrames(3) - pst2KeyFrames(2))/stepsize));
+    
+    
+    %final to default
+    fdTotal = max(abs((pst1KeyFrames(1) - pst1KeyFrames(3))/stepsize), abs((pst2KeyFrames(1) - pst2KeyFrames(3))/stepsize));
+    
+    total = diTotal + ifTotal + fdTotal;
+    
+    %populate piston length arrays
+    %defaul
+    for i = 1:total
+    
+    end
+
+    %Once interpolation is done, calculate frame i positions based on the piston lengths:
+
+    for i = 1:total
+    pst1PlotAng(i) = acos((pst1Link1^2+pst1Grnd^2-pst1Lgth(i)^2)/(2*pst1Link1*pst1Grnd));
+    pst2PlotAng(i) = acos((pst2Link1^2+pst2Link2^2-pst2Lgth(i)^2)/(2*pst2Link1*pst2Link2));
+    link1PlotAng(i) = asin((pst1Lgth(i)*sin(pst1PlotAng(i)))/pst1Link1);
+    link2PlotAng(i) = (link1PlotAng(i) - 180) + asin((pst2Lgth(i)*sin(pst2PlotAng(i)))/pst2Link2);
+    end
+    
+
+    %}
     %% Possible constraints
 %{
     1. Position of ends of link 1 and link 2 must always be in the first 2
