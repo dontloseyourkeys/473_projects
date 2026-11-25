@@ -331,15 +331,16 @@ y2(1) = y1;
         end
     end
     
-    %Once interpolation is done, calculate frame i positions for everything else based on the piston lengths:
+    %Calculate angles of all plot elements relative to positive x axis for each
+    %frame based on piston lengths
     for i = 1:length(pstPlotLgth)
-        pstPlotAng(1,i) = acos((pst1Link1^2+pst1Grnd^2-pstPlotLgth(1,i)^2)/(2*pst1Link1*pst1Grnd));
-        pstPlotAng(2,i) = acos((pst2Link1^2+pst2Link2^2-pstPlotLgth(2,i)^2)/(2*pst2Link1*pst2Link2));
-        %Following calculations return complex numbers
-        linkPlotAng(1,i) = asin((pstPlotLgth(1,i)*sin(pstPlotAng(1,i)))/pst1Link1);
-        linkPlotAng(2,i) = (linkPlotAng(1,i) - 180) + asin((pstPlotLgth(2,i)*sin(pstPlotAng(2,i)))/pst2Link2);
+        pstPlotAng(1,i) = pi - acos((pstPlotLgth(1,i)^2+pst1Grnd^2-pst1Link1^2)/(2*pstPlotLgth(1,i)*pst1Grnd));
+        linkPlotAng(1,i) = acos((pst1Link1^2+pst1Grnd^2-pstPlotLgth(1,i)^2)/(2*pst1Link1*pst1Grnd));
+        pstPlotAng(2,i) = linkPlotAng(1,i) - acos((pst2Link1^2+pstPlotLgth(2,i)^2-pst2Link2^2)/(2*pst2Link1*pstPlotLgth(2,i)));
+        linkPlotAng(2,i) = (linkPlotAng(1,i) - pi) + acos((pst2Link1^2+pst2Link2^2-pstPlotLgth(2,i)^2)/(2*pst2Link1*pst2Link2));
     end
-    disp(linkPlotAng);
+    disp(linkPlotAng)
+
     %% Possible constraints
 %{
     1. Position of ends of link 1 and link 2 must always be in the first 2
