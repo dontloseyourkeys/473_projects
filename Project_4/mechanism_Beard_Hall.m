@@ -7,7 +7,7 @@ hydraulic robotic claw arm that can move an object.
 
 initX, initY: the initial x and y positions for the object to be moved
 finalX, finalY: the position the object should be moved to.
-speed: the animation speed, rads/s of ___(whatever we consider the base link)____
+speed: the animation speed, piston length change per second
 %}
 
 
@@ -22,7 +22,7 @@ if nargin < 4
         initY = 80;
         finalX = 50;
         finalY = 30;
-        speed = 2;
+        speed = 30;
     end
 
 %TODO 
@@ -124,15 +124,15 @@ List of Topics and Sub-Modules for Project 4
 % maybe some visual indicators of the initial and final positions (we could have pale dotted objects represent these positions and have the object itself in a brighter solid line colour)
 
 %initialize fixed parameters
-link1 = 50;
-pst1Link1 = link1*0.25; %point where piston 1 attaches to link 1 mesaured from ground
-pst1Grnd = link1*0.1; %point where piston 1 attaches to ground measured as distance from arm base/origin
-link2 = 50;
-pst2Link2 = link2*0.25; %point where piston 2 attaches to link 2 measured along link 2 from elbow
-pst2Link1 = link1*0.1; %point where piston 2 attaches to link 1 measured along link 1 from elbow
+link1Lgth = 50;
+pst1Link1 = link1Lgth*0.25; %point where piston 1 attaches to link 1 mesaured from ground
+pst1Grnd = link1Lgth*0.1; %point where piston 1 attaches to ground measured as distance from arm base/origin
+link2Lgth = 50;
+pst2Link2 = link2Lgth*0.25; %point where piston 2 attaches to link 2 measured along link 2 from elbow
+pst2Link1 = link1Lgth*0.1; %point where piston 2 attaches to link 1 measured along link 1 from elbow
 %% PST2LINK1 WILL NEED TO BE SUBTRACTED FROM LINK 1 TO GET RIGHT LENGTH FOR THE PLOT
 
-maxReach = link1 + link2; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
+maxReach = link1Lgth + link2Lgth; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
 
 %% Arrays, hard coded default position assumes link 1 points straight up and link 2 is at -pi/4 radians from + x axis
 %% for the following 2 arrays, first index is the piston or link number, and the second index is the specific position
@@ -148,6 +148,14 @@ linkPlotAng = zeros(2,0); %link angles
 pstPlotLgth = zeros(2,0); %piston lengths
 pstPlotAng = zeros(2,0); %piston angles
 
+% Arrays to be filled with coordinate data
+% 1st row is x coords, 2nd row is y coords, column is frame
+pst1End = zeros(2,0);
+pst2Start = zeros(2,0);
+pst2End = zeros(2,0);
+link1End = zeros(2,0);
+link2End = zeros(2,0);
+
 %% position states and motion
 
 %the origin (fixed side of link 1)
@@ -156,10 +164,10 @@ y0 = 0;
 
 %link 1 initial coordinates
 x1(1) = x0; %TODO PLACEHOLDERS change to depend on angle
-y1(1) = y0 + link1;
+y1(1) = y0 + link1Lgth;
 
 %link 2 coordinates
-x2(1) = x1 + link2; %TODO PLACEHOLDERS change to depend on angle
+x2(1) = x1 + link2Lgth; %TODO PLACEHOLDERS change to depend on angle
 y2(1) = y1;
 
 % initial, moving free end of link 2 from default position to init
@@ -177,8 +185,8 @@ y2(1) = y1;
     iPosLgth = hypot(initX, initY);
     iPosAng = atan2(initX, initY);
     %Calculate link angles from triangle made with init position vector
-    linkAng(1,2) = acos((link1^2 + iPosLgth^2 - link2^2)/(2*link1*iPosLgth)) + iPosAng;
-    linkAng(2,2) = acos((link1^2 + link2^2 - iPosLgth^2)/(2*link1*link2));
+    linkAng(1,2) = acos((link1Lgth^2 + iPosLgth^2 - link2Lgth^2)/(2*link1Lgth*iPosLgth)) + iPosAng;
+    linkAng(2,2) = acos((link1Lgth^2 + link2Lgth^2 - iPosLgth^2)/(2*link1Lgth*link2Lgth));
     %Calculate piston lengths
     pstKeyFrames(1,2) = sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,2)));
     pstKeyFrames(2,2) = sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,2)));
@@ -197,8 +205,8 @@ y2(1) = y1;
     fPosLgth = hypot(finalX, finalY);
     fPosAng = atan2(finalX, finalY);
     %Calculate link angles from triangle made with init position vector
-    linkAng(1,3) = acos((link1^2 + fPosLgth^2 - link2^2)/(2*link1*fPosLgth)) + fPosAng;
-    linkAng(2,3) = acos((link1^2 + link2^2 - fPosLgth^2)/(2*link1*link2));
+    linkAng(1,3) = acos((link1Lgth^2 + fPosLgth^2 - link2Lgth^2)/(2*link1Lgth*fPosLgth)) + fPosAng;
+    linkAng(2,3) = acos((link1Lgth^2 + link2Lgth^2 - fPosLgth^2)/(2*link1Lgth*link2Lgth));
     %Calculate piston lengths
     pstKeyFrames(1,3) = sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,3)));
     pstKeyFrames(2,3) = sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,3)));
@@ -211,11 +219,13 @@ y2(1) = y1;
     pst1PltAng(3) = asin((pst1Link1*sin(link1Ang(3)))/pst1KeyFrames(3));
     pst2PltAng(3) = (link1Ang(3) - asin((pst2Link2*sin(link2Ang(3)))/pst2KeyFrames(2))); %relative to positive x axis
     %}
-  
-%% Interpolating between piston length keyframes
-    %placeholder step size for piston length change
-    stepSize = 0.1;
+   
 
+%% Creating frames for animation
+    fps = 60; %frames per second [frames/second]
+    pstFrameStep = speed/60; %piston length change per frame    
+    
+    
     %% defualt to initial
 
     %initialize the first frame for this motion
@@ -224,7 +234,7 @@ y2(1) = y1;
 
     %Calculate total required frames based on which piston needs more steps
     %to get into the new position
-    diTotal = ceil(max(abs((pstKeyFrames(1,2) - pstKeyFrames(1,1))/stepSize), abs((pstKeyFrames(2,2) - pstKeyFrames(2,1))/stepSize)));
+    diTotal = ceil(max(abs((pstKeyFrames(1,2) - pstKeyFrames(1,1))/pstFrameStep), abs((pstKeyFrames(2,2) - pstKeyFrames(2,1))/pstFrameStep)));
   
     %once for each piston
     for i = 1:2 
@@ -242,7 +252,7 @@ y2(1) = y1;
             if pstDone == false
                 %change the position by the step size in the determined
                 %direction
-                pstPlotLgth(i,j) = pstPlotLgth(i,(j-1)) + stepSize*sign;
+                pstPlotLgth(i,j) = pstPlotLgth(i,(j-1)) + pstFrameStep*sign;
             else
                 %set the current frame to the same position as the last
                 %frame
@@ -250,7 +260,7 @@ y2(1) = y1;
             end
             %if current frame's position is within a step size of the
             %initial position
-            if abs(pstPlotLgth(i,j) - pstKeyFrames(i,2)) < stepSize
+            if abs(pstPlotLgth(i,j) - pstKeyFrames(i,2)) < pstFrameStep
                 %Stop moving this piston during this motion
                 pstDone = true;
             end
@@ -261,7 +271,7 @@ y2(1) = y1;
     
     %Calculate total required frames based on which piston needs more steps
     %to get into the new position
-    ifTotal = ceil(max(abs((pstKeyFrames(1,3) - pstKeyFrames(1,2))/stepSize), abs((pstKeyFrames(2,3) - pstKeyFrames(2,2))/stepSize)));
+    ifTotal = ceil(max(abs((pstKeyFrames(1,3) - pstKeyFrames(1,2))/pstFrameStep), abs((pstKeyFrames(2,3) - pstKeyFrames(2,2))/pstFrameStep)));
 
     %once for each piston
     for i = 1:2 
@@ -279,7 +289,7 @@ y2(1) = y1;
             if pstDone == false
                 %change the position by the step size in the determined
                 %direction
-                pstPlotLgth(i,j) = pstPlotLgth(i,(j-1)) + stepSize*sign;
+                pstPlotLgth(i,j) = pstPlotLgth(i,(j-1)) + pstFrameStep*sign;
             else
                 %set the current frame to the same position as the last
                 %frame
@@ -287,7 +297,7 @@ y2(1) = y1;
             end
             %if current frame's position is within a step size of the
             %initial position
-            if abs(pstPlotLgth(i,j) - pstKeyFrames(i,3)) < stepSize
+            if abs(pstPlotLgth(i,j) - pstKeyFrames(i,3)) < pstFrameStep
                 %Stop moving this piston during this motion
                 pstDone = true;
             end
@@ -298,7 +308,7 @@ y2(1) = y1;
 
     %Calculate total required frames based on which piston needs more steps
     %to get into the new position
-    fdTotal = ceil(max(abs((pstKeyFrames(1,1) - pstKeyFrames(1,3))/stepSize), abs((pstKeyFrames(2,1) - pstKeyFrames(2,3))/stepSize)));
+    fdTotal = ceil(max(abs((pstKeyFrames(1,1) - pstKeyFrames(1,3))/pstFrameStep), abs((pstKeyFrames(2,1) - pstKeyFrames(2,3))/pstFrameStep)));
  
     %once for each piston
     for i = 1:2 
@@ -316,7 +326,7 @@ y2(1) = y1;
             if pstDone == false
                 %change the position by the step size in the determined
                 %direction
-                pstPlotLgth(i,j) = pstPlotLgth(i,(j-1)) + stepSize*sign;
+                pstPlotLgth(i,j) = pstPlotLgth(i,(j-1)) + pstFrameStep*sign;
             else
                 %set the current frame to the same position as the last
                 %frame
@@ -324,7 +334,7 @@ y2(1) = y1;
             end
             %if current frame's position is within a step size of the
             %initial position
-            if abs(pstPlotLgth(i,j) - pstKeyFrames(i,1)) < stepSize
+            if abs(pstPlotLgth(i,j) - pstKeyFrames(i,1)) < pstFrameStep
                 %Stop moving this piston during this motion
                 pstDone = true;
             end
@@ -339,7 +349,25 @@ y2(1) = y1;
         pstPlotAng(2,i) = linkPlotAng(1,i) - acos((pst2Link1^2+pstPlotLgth(2,i)^2-pst2Link2^2)/(2*pst2Link1*pstPlotLgth(2,i)));
         linkPlotAng(2,i) = (linkPlotAng(1,i) - pi) + acos((pst2Link1^2+pst2Link2^2-pstPlotLgth(2,i)^2)/(2*pst2Link1*pst2Link2));
     end
-
+    
+    %calculate per frame plot element coordinates
+    for i = 1:length(pstPlotLgth)
+        %coordinates of the end of link 1
+        link1End(1,i) = link1Lgth*cos(linkPlotAng(1,i));
+        link1End(2,i) = link1Lgth*sin(linkPlotAng(1,i));
+        %coordinates of the end of link 2
+        link2End(1,i) = link1Lgth*cos(linkPlotAng(1,i)) + link2Lgth*cos(linkPlotAng(2,i));
+        link2End(2,i) = link1Lgth*sin(linkPlotAng(1,i)) + link2Lgth*sin(linkPlotAng(2,i));
+        %coordinates of the end of piston 1, start is fixed at (pst1Grnd, 0)
+        pst1End(1,i) = pstPlotLgth(1,i)*cos(pstPlotAng(1,i));
+        pst1End(2,i) = pstPlotLgth(1,i)*sin(pstPlotAng(1,i));
+        %coordinates of the start of piston 2 along link 1
+        pst2Start(1,i) = (link1Lgth - pst2Link1)*cos(linkPlotAng(1,i));
+        pst2Start(2,i) = (link1Lgth - pst2Link1)*sin(linkPlotAng(1,i));
+        %coordinates of the end of piston 2 along link 2
+        pst2End(1,i) = link1Lgth*cos(linkPlotAng(1,i)) + pst2Link2*cos(pstPlotAng(2,i));
+        pst2End(2,i) = link1Lgth*sin(linkPlotAng(1,i)) + pst2Link2*sin(pstPlotAng(2,i));
+    end
     %% Possible constraints
 %{
     1. Position of ends of link 1 and link 2 must always be in the first 2
@@ -349,12 +377,6 @@ y2(1) = y1;
     3. Links will only move one at a time
 %}
 
-%All animation code will need to use variable size loops due to variable
-%lengths of motion
-
-%maybe have link 2 extend so possible arm positions create a rectangular
-%field rather than a circular one?
-
 %moveable object parameters:
 radius = 2; 
 
@@ -363,10 +385,6 @@ objX(1) = x2(1);% TODO Change to be the actual current position of the object in
 objY(1) = y2(1);%
 
 obj_pos = [objX - radius, objY - radius, 2*radius, 2*radius];
-
-
-
-
 
 %% Animations
 % TODO: move code below this up only when variables are needed further up
@@ -390,14 +408,15 @@ axis equal % sets axes to equal
         %plot object handles
             ground = line([(x0 -5) (x0+5)],[0 0],'linewidth', 2,'color','#0C8A11', 'LineStyle', '--'); %plot object for ground, does not need updating per frame
 
-            links = plot([x0 x1(1) x2(1)],[y0 y1(1) y2(1)],'-o','linewidth',2, 'Color', 'b'); %plot obejct for rocker arm, spans from p0-p3
+            links = plot([x0 link1End(1,1) link2End(1,1)],[y0 link1End(2,1) link2End(2,1)],'-o','linewidth',2, 'Color', 'b'); %plot obejct for rocker arm, spans from p0-p3
             
+            piston1 = plot([pst1Grnd pst1End(1,1)],[0 pst1End(2,1)],'-o','linewidth',2, 'Color', 'r'); %plots piston connected to ground
+
+            piston2 = plot([pst2Start(1,1) pst2End(1,1)],[pst2Start(2,1) pst2End(2,1)],'-o','linewidth',2, 'Color', 'r'); %plots piston at link elbow
             
             m_object = rectangle('Position', obj_pos,...
                  'Curvature', [1 1], 'FaceColor', 'b', 'EdgeColor', 'k', 'LineWidth', 1.5);
     
-
-
             % initial and final object positions: (should not move)
              init_object = rectangle('Position', [initX - radius, initY - radius, 2*radius, 2*radius],...
                  'Curvature', [1 1], 'FaceColor', 'w', 'EdgeColor', 'b', 'LineWidth', 1.5, 'LineStyle', '--');
@@ -428,26 +447,19 @@ axis equal % sets axes to equal
                     
         hold off
 
-                   
-
-%% creating frames for animation 
-
-    fps = 60; %frames per second [frames/second]
-    rad_frame = speed / fps; %rads per frame, replaces astep
-    theta2 = theta0:rad_frame:(n*2*pi)+theta0; %start:step:end notation, 0-3 full rotations, in steps of size astep      
-    timestep = 1/fps; % fps inverted gives seconds per frame
-    time = theta2 ./ speed; %ARRAY, (results in a time value in seconds for plotting angles)
-
 
 %% Frame updates for both plots
-     
-    for n = 2:length(theta2)
+
+    timestep = 1/fps; % fps inverted gives seconds per frame
+
+    for n = 2:length(pstPlotLgth)
         pause(timestep) %shows previous frame for timestep length
                 
         %sets objects to next position
         %set(link4,'XData',[x0 x3(n)],'YData',[y0 y3(n)]);   %error in cases
-        
-  
+        set(links,'XData',[x0 link1End(1,i) link2End(2,i)],'YData',[y0 link1End(2,i) link2End(2,i)]);
+        set(piston1,'XData',[pst1Grnd pst1End(1,i)],'YData',[0 pst1End(2,i)]);
+        set(piston2,'XData',[pst2Start(1,i) pst2End(1,i)],'YData',[pst2Start(2,i) pst2End(2,i)]);
 
     end %update end
 
