@@ -22,7 +22,7 @@ if nargin < 4
         initY = 80;
         finalX = 50;
         finalY = 30;
-        speed = 30;
+        speed = 3;
     end
 
 %TODO 
@@ -451,8 +451,7 @@ axis equal % sets axes to equal
 %% Frame updates for both plots
 
     timestep = 1/fps; % fps inverted gives seconds per frame
-
-    for n = 2:length(pstPlotLgth)
+    for i = 2:length(pstPlotLgth)
         pause(timestep) %shows previous frame for timestep length
                 
         %sets objects to next position
