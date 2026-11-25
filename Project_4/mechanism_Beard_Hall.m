@@ -18,10 +18,10 @@ close all %closes any windows that are open still
 % TODO remove before submission but these are placeholders so we can easily
 % test
 if nargin < 4
-        initX = 2;
-        initY = 8;
-        finalX = 5;
-        finalY = 3;
+        initX = 20;
+        initY = 80;
+        finalX = 50;
+        finalY = 30;
         speed = 2;
     end
 
@@ -124,10 +124,10 @@ List of Topics and Sub-Modules for Project 4
 % maybe some visual indicators of the initial and final positions (we could have pale dotted objects represent these positions and have the object itself in a brighter solid line colour)
 
 %initialize fixed parameters
-link1 = 10;
+link1 = 50;
 pst1Link1 = link1*0.25; %point where piston 1 attaches to link 1 mesaured from ground
 pst1Grnd = link1*0.1; %point where piston 1 attaches to ground measured as distance from arm base/origin
-link2 = 10;
+link2 = 50;
 pst2Link2 = link2*0.25; %point where piston 2 attaches to link 2 measured along link 2 from elbow
 pst2Link1 = link1*0.1; %point where piston 2 attaches to link 1 measured along link 1 from elbow
 %% PST2LINK1 WILL NEED TO BE SUBTRACTED FROM LINK 1 TO GET RIGHT LENGTH FOR THE PLOT
@@ -287,7 +287,7 @@ y2(1) = y1;
             end
             %if current frame's position is within a step size of the
             %initial position
-            if abs(pstPlotLgth(i,j) - pstKeyFrames(i,2)) < stepSize
+            if abs(pstPlotLgth(i,j) - pstKeyFrames(i,3)) < stepSize
                 %Stop moving this piston during this motion
                 pstDone = true;
             end
@@ -324,22 +324,22 @@ y2(1) = y1;
             end
             %if current frame's position is within a step size of the
             %initial position
-            if abs(pstPlotLgth(i,j) - pstKeyFrames(i,2)) < stepSize
+            if abs(pstPlotLgth(i,j) - pstKeyFrames(i,1)) < stepSize
                 %Stop moving this piston during this motion
                 pstDone = true;
             end
         end
     end
-
+    
     %Once interpolation is done, calculate frame i positions for everything else based on the piston lengths:
     for i = 1:length(pstPlotLgth)
-    pstPlotAng(1,i) = acos((pst1Link1^2+pst1Grnd^2-pstPlotLgth(1,i)^2)/(2*pst1Link1*pst1Grnd));
-    pstPlotAng(2,i) = acos((pst2Link1^2+pst2Link2^2-pstPlotLgth(2,i)^2)/(2*pst2Link1*pst2Link2));
-    linkPlotAng(1,i) = asin((pstPlotLgth(1,i)*sin(pstPlotAng(1,i)))/pst1Link1);
-    linkPlotAng(2,i) = (linkPlotAng(1,i) - 180) + asin((pstPlotLgth(2,i)*sin(pstPlotAng(2,i)))/pst2Link2);
+        pstPlotAng(1,i) = acos((pst1Link1^2+pst1Grnd^2-pstPlotLgth(1,i)^2)/(2*pst1Link1*pst1Grnd));
+        pstPlotAng(2,i) = acos((pst2Link1^2+pst2Link2^2-pstPlotLgth(2,i)^2)/(2*pst2Link1*pst2Link2));
+        %Following calculations return complex numbers
+        linkPlotAng(1,i) = asin((pstPlotLgth(1,i)*sin(pstPlotAng(1,i)))/pst1Link1);
+        linkPlotAng(2,i) = (linkPlotAng(1,i) - 180) + asin((pstPlotLgth(2,i)*sin(pstPlotAng(2,i)))/pst2Link2);
     end
-    disp(pstPlotAng)
-    disp(linkPlotAng)
+    disp(linkPlotAng);
     %% Possible constraints
 %{
     1. Position of ends of link 1 and link 2 must always be in the first 2
