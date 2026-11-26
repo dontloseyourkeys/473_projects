@@ -334,8 +334,6 @@ y2(1) = y1;
         linkPlotAng(2,i) = (linkPlotAng(1,i) - pi) + acos((pst2Link1^2+pst2Link2^2-pstPlotLgth(2,i)^2)/(2*pst2Link1*pst2Link2));
     end
 
-    disp(pstPlotLgth(1,1))
-    disp(pstPlotAng(1,1))
     %calculate per frame plot element coordinates
     for i = 1:length(pstPlotLgth)
         %coordinates of the end of link 1
