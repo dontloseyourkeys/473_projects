@@ -434,7 +434,7 @@ axis equal % sets axes to equal
                 
         %sets objects to next position
         %set(link4,'XData',[x0 x3(n)],'YData',[y0 y3(n)]);   %error in cases
-        set(links,'XData',[x0 link1End(1,i) link2End(2,i)],'YData',[y0 link1End(2,i) link2End(2,i)]);
+        set(links,'XData',[x0 link1End(1,i) link2End(1,i)],'YData',[y0 link1End(2,i) link2End(2,i)]);
         set(piston1,'XData',[pst1Grnd pst1End(1,i)],'YData',[0 pst1End(2,i)]);
         set(piston2,'XData',[pst2Start(1,i) pst2End(1,i)],'YData',[pst2Start(2,i) pst2End(2,i)]);
 
