@@ -112,7 +112,7 @@ pst2Link1 = link1Lgth*0.1; %point where piston 2 attaches to link 1 measured alo
 
 maxReach = link1Lgth + link2Lgth; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
 
-%% Arrays, hard coded default position assumes link 1 points straight up and link 2 is at -pi/4 radians from + x axis
+%% Arrays, hard coded default position assumes link 1 points straight up and link 2 is at 0 radians from + x axis
 %% for the following 2 arrays, first index is the piston or link number, and the second index is the specific position
 %% 1 = default position, 2 = initial position of object, 3 = final position
 %% Angles needed for calculating piston lengths
@@ -223,6 +223,8 @@ y2(1) = y1;
             sign = 1;
         elseif pstKeyFrames(i,1) > pstKeyFrames(i,2) %decrease the value if initial is less than default position
             sign = -1;
+        else
+            sign = 0;
         end
         %for each frame in the current motion
         for j = 2:diTotal
@@ -260,6 +262,8 @@ y2(1) = y1;
             sign = 1;
         elseif pstKeyFrames(i,2) > pstKeyFrames(i,3) %decrease the value if final is less than initial position
             sign = -1;
+        else
+            sign = 0;
         end
         %for each frame in the current motion
         for j = (diTotal + 1):(diTotal + ifTotal)
@@ -297,6 +301,8 @@ y2(1) = y1;
             sign = 1;
         elseif pstKeyFrames(i,3) > pstKeyFrames(i,1) %decrease the value if default is less than final position
             sign = -1;
+        else
+            sign = 0;
         end
         %for each frame in the current motion
         for j = (diTotal + ifTotal + 1):(diTotal + ifTotal + fdTotal)
@@ -327,7 +333,9 @@ y2(1) = y1;
         pstPlotAng(2,i) = linkPlotAng(1,i) - acos((pst2Link1^2+pstPlotLgth(2,i)^2-pst2Link2^2)/(2*pst2Link1*pstPlotLgth(2,i)));
         linkPlotAng(2,i) = (linkPlotAng(1,i) - pi) + acos((pst2Link1^2+pst2Link2^2-pstPlotLgth(2,i)^2)/(2*pst2Link1*pst2Link2));
     end
-    
+
+    disp(pstPlotLgth(1,1))
+    disp(pstPlotAng(1,1))
     %calculate per frame plot element coordinates
     for i = 1:length(pstPlotLgth)
         %coordinates of the end of link 1
@@ -337,14 +345,14 @@ y2(1) = y1;
         link2End(1,i) = link1Lgth*cos(linkPlotAng(1,i)) + link2Lgth*cos(linkPlotAng(2,i));
         link2End(2,i) = link1Lgth*sin(linkPlotAng(1,i)) + link2Lgth*sin(linkPlotAng(2,i));
         %coordinates of the end of piston 1, start is fixed at (pst1Grnd, 0)
-        pst1End(1,i) = pstPlotLgth(1,i)*cos(pstPlotAng(1,i));
+        pst1End(1,i) = pstPlotLgth(1,i)*cos(pstPlotAng(1,i)) + pst1Grnd;
         pst1End(2,i) = pstPlotLgth(1,i)*sin(pstPlotAng(1,i));
         %coordinates of the start of piston 2 along link 1
         pst2Start(1,i) = (link1Lgth - pst2Link1)*cos(linkPlotAng(1,i));
         pst2Start(2,i) = (link1Lgth - pst2Link1)*sin(linkPlotAng(1,i));
         %coordinates of the end of piston 2 along link 2
-        pst2End(1,i) = link1Lgth*cos(linkPlotAng(1,i)) + pst2Link2*cos(pstPlotAng(2,i));
-        pst2End(2,i) = link1Lgth*sin(linkPlotAng(1,i)) + pst2Link2*sin(pstPlotAng(2,i));
+        pst2End(1,i) = (link1Lgth - pst2Link1)*cos(linkPlotAng(1,i)) + pstPlotLgth(2,i)*cos(pstPlotAng(2,i));
+        pst2End(2,i) = (link1Lgth - pst2Link1)*sin(linkPlotAng(1,i)) + pstPlotLgth(2,i)*sin(pstPlotAng(2,i));
     end
     %% Possible constraints
 %{
