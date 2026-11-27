@@ -1,4 +1,4 @@
-function [] = mechanism_Beard_Hall(linkLgth, initX, initY, finalX, finalY, speed)
+function [] = mechanism_Beard_Hall(link1Lgth, link2Lgth, initX, initY, finalX, finalY, speed)
 
 %% Function Description
 %{
@@ -12,15 +12,14 @@ finalX, finalY: the position the object should be moved to.
 speed: the animation speed, piston length change per second
 %}
 
-
 close all %closes any windows that are open still
 
-%mechanism_Beard_Hall(beta1, beta2, beta3, beta4, speed, L, R0)
-
 % TODO remove before submission but these are placeholders so we can easily
-% test
+
 if nargin < 4
-        linkLgth = 50;
+        %linkLgth = 50;
+        link1Lgth = 50;
+        link2Lgth = 50;
         initX = 80;
         initY = 20;
         finalX = 30;
@@ -109,18 +108,34 @@ Grades based off of:
 %link2Lgth = 35;
 
 %link1Lgth = linkLgth;
-%pst1Link1 = link1Lgth*0.25; %point where piston 1 attaches to link 1 mesaured from ground
+pst1Link1 = link1Lgth*0.25; %point where piston 1 attaches to link 1 mesaured from ground
 pst1Grnd = link1Lgth*0.1; %point where piston 1 attaches to ground measured as distance from arm base/origin
 
 %link2Lgth = linkLgth;
 pst2Link2 = link2Lgth*0.25; %point where piston 2 attaches to link 2 measured along link 2 from elbow
 pst2Link1 = link1Lgth*0.1; %point where piston 2 attaches to link 1 measured along link 1 from elbow
 
-
-%% PST2LINK1 WILL NEED TO BE SUBTRACTED FROM LINK 1 TO GET RIGHT LENGTH FOR THE PLOT
+%% Compatibility checks
+% PST2LINK1 WILL NEED TO BE SUBTRACTED FROM LINK 1 TO GET RIGHT LENGTH FOR THE PLOT
 
 maxReach = link1Lgth + link2Lgth; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
-minReach = abs(link2Lgth - link1Lgth)
+minReach = abs(link2Lgth - link1Lgth);
+
+
+if min([link1Lgth, link2Lgth]) < 0
+        disp("Links must only have positive lengths")
+        return
+end
+
+if (link2Lgth) > ((link1Lgth)*sqrt(2))
+        disp("Increase the length of link 1 or decrease the length of link 2")
+        return
+end
+
+if min([initX, initY, finalX, finalY]) < 0
+        disp("Points must only have positive coordinates")
+        return
+end
 
 if max([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) > maxReach %%split
     disp("points too far for grabbing range, please choose points closer to the origin, or adjust link lengths")
@@ -133,21 +148,21 @@ if min([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) < minReach
     return
 end
 
-%if min([initX, initY, finalX, finalY]) < 0;
-
-
-
 
 
 %% Arrays, hard coded default position assumes link 1 points straight up and link 2 is at 0 radians from + x axis
 %% for the following 2 arrays, first index is the piston or link number, and the second index is the specific position
 %% 1 = default position, 2 = initial position of object, 3 = final position
+
+
 %% Angles needed for calculating piston lengths
 linkAng = [pi/2, 0, 0; -pi/4, 0, 0];
 %% Piston lengths associated with default, initial, and final positions
 pstKeyFrames = [sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,1))),0,0; sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,1))),0,0];
 
 %% Arrays to be filled with frame specific angle or length data based on 
+
+
 %% interpolation between values contained in the arrays above
 linkPlotAng = zeros(2,0); %link angles
 pstPlotLgth = zeros(2,0); %piston lengths
@@ -189,6 +204,7 @@ y0 = 0;
     %Convert init coordinates to a position vector
     iPosLgth = hypot(initX, initY);
     iPosAng = atan2(initY, initX); %apparently Atan takes y first
+
     %Calculate link angles from triangle made with init position vector
     linkAng(1,2) = acos((link1Lgth^2 + iPosLgth^2 - link2Lgth^2)/(2*link1Lgth*iPosLgth)) + iPosAng;
     linkAng(2,2) = acos((link1Lgth^2 + link2Lgth^2 - iPosLgth^2)/(2*link1Lgth*link2Lgth));
@@ -231,6 +247,7 @@ y0 = 0;
 %% Creating frames for animation
     fps = 60; %frames per second [frames/second]
     pstFrameStep = speed/60; %piston length change per frame    
+
 
 
     %% defualt to initial
@@ -397,7 +414,8 @@ y0 = 0;
     
     %grabbing num of frames
     num_frames = length(pstPlotLgth);
-    
+
+
     %initialising positions for ball
     objX = zeros(1, num_frames);
     objY = zeros(1, num_frames);
@@ -435,6 +453,34 @@ y0 = 0;
     %{
 since link length is fixed, 
     %}
+
+
+    %% graphing
+
+%array for holding 
+
+span1 = hypot(pst1End(1, :) - pst1Grnd, pst1End(2, :))
+span2 = hypot(pst2End(1, :) - pst2Start(1, :), pst2End(2, :) - pst2Start(2, :))
+
+deltaTime =  (1:size(pstPlotLgth, 2)) ./ fps %time in seconds
+    
+
+%plot piston length over time
+% pst1End(1,i) is x values 
+%pst1End(1, i) is y values
+
+%hypot( , initY);
+% hyp pst1End(1,i)-% pst1End(1,i) is x values
+
+
+
+
+% piston 2: 
+
+
+%plot x and y of object trajectory
+
+
 
 
 
@@ -498,17 +544,33 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
 
  ax2 = subplot(4, 1, 3); %graph space
 
+    hold on;
+    yyaxis left %adds left axis stuff and plots relative to that
+    
+        xlabel('Time (s)');
+        ylabel('Piston 1 length');
+        grid on
+        
+        %ylim([(1.2 * min(phi)), (1.2 * max(phi))]); %sets y limits to 1.2 times extreme vals
+        
+        %rad_lims = ylim;
+    
+        title('Graph 1');
 
-%plot piston length over time
-
-%piston 1:
-
-%piston 2:
-
-
-%plot x and y of object trajectory
-
-
+     span1plot = plot(deltaTime, span1, 'linewidth', 2, 'Color', 'k');  %draws the graph
+     span2plot = plot(deltaTime, span2, 'linewidth', 2, 'Color', 'k');  %draws the graph
+   
+     
+     % phi_mark = plot(time(1), phi(1), 'bo', 'MarkerFaceColor', 'b'); %adds a marker to the time graph for current angle at current time
+    
+        
+     %yyaxis right
+     %ylabel('Angle (deg)');
+     %ylim(rad2deg(rad_lims));
+    
+    hold off;
+    
+    pause(1)   
 
 
 
