@@ -1,4 +1,4 @@
-function [] = mechanism_Beard_Hall(link1Lgth, link2Lgth, initX, initY, finalX, finalY, speed)
+function [] = mechanism_Beard_Hall(linkLgth, initX, initY, finalX, finalY, speed)
 
 %% Function Description
 %{
@@ -118,11 +118,11 @@ Grades based off of:
 
 %link2Lgth = 35;
 
-%link1Lgth = linkLgth;
+link1Lgth = linkLgth;
 pst1Link1 = link1Lgth*0.25; %point where piston 1 attaches to link 1 mesaured from ground
 pst1Grnd = link1Lgth*0.1; %point where piston 1 attaches to ground measured as distance from arm base/origin
 
-%link2Lgth = linkLgth;
+link2Lgth = linkLgth;
 pst2Link2 = link2Lgth*0.25; %point where piston 2 attaches to link 2 measured along link 2 from elbow
 pst2Link1 = link1Lgth*0.1; %point where piston 2 attaches to link 1 measured along link 1 from elbow
 
@@ -422,7 +422,7 @@ y0 = 0;
     
     
     %moveable object parameters:
-    radius = 2; 
+    radius = 0.05*linkLgth; 
     
     %grabbing num of frames
     num_frames = length(pstPlotLgth);
@@ -617,7 +617,6 @@ hold off
         pause(timestep) %shows previous frame for timestep length
                 
         %sets objects to next position
-        %set(link4,'XData',[x0 x3(n)],'YData',[y0 y3(n)]);   %error in cases
         set(links,'XData',[x0 link1End(1,i) link2End(1,i)],'YData',[y0 link1End(2,i) link2End(2,i)]);
         set(piston1,'XData',[pst1Grnd pst1End(1,i)],'YData',[0 pst1End(2,i)]);
         set(piston2,'XData',[pst2Start(1,i) pst2End(1,i)],'YData',[pst2Start(2,i) pst2End(2,i)]);
