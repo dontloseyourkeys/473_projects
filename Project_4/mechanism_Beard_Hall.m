@@ -297,7 +297,8 @@ y0 = 0;
             end
             %if current frame's position is within a step size of the
             %initial position
-            if abs(pstPlotLgth(i,j) - pstKeyFrames(i,2)) < pstFrameStep
+            if abs(pstPlotLgth(i,j) - pstKeyFrames(i,2)) < pstFrameStep %%this may have to do with the visual jumps
+
                 %Stop moving this piston during this motion
                 pstDone = true;
             end
@@ -587,9 +588,13 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
 
  ax3 = subplot(6, 1, 6); %text box
 
-     span1plot = plot(deltaTime, span1, 'linewidth', 2, 'Color', 'r');  %draws the graph
+ hold on;
 
-     
+     obj_x = plot(deltaTime, objX, 'linewidth', 2, 'Color', 'k');  %draws the graph
+
+     obj_y = plot(deltaTime, objY, 'linewidth', 2, 'Color', 'g');  %draws the graph
+
+
         str = {'Inspired by toy robotics kits, this project animates ',... ...
             'a hydraulic arm that can grab and move a ball from ',...
             'an initial position to a final position. The',...
@@ -602,7 +607,7 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
             'VerticalAlignment', 'middle', ...
             'FontSize', 12);
                     
-        hold off
+hold off
 
 
 %% Frame updates for both plots
