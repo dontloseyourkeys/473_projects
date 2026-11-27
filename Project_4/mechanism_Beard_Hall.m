@@ -2,14 +2,35 @@ function [] = mechanism_Beard_Hall(linkLgth, initX, initY, finalX, finalY, speed
 
 %% Function Description
 %{
-This function mechanism_Beard_Hall takes inputs 
-______ and animates a
-hydraulic robotic claw arm that can move an object.
+This function mechanism_Beard_Hall takes the following inputs and animates a
+hydraulic robotic claw arm that can move an object between predetermined positions.
 
 linkLgth: the length of the 2 links
 initX, initY: the initial x and y positions for the object to be moved
 finalX, finalY: the position the object should be moved to.
 speed: the animation speed, piston length change per second
+
+    The initial and final positions will be converted to vectors that form
+triangles with both links. The angles for these resulting triangles are
+calculated using the cosine law, and those angles adjacent to the pistons
+will be used in conjunction with the piston connection points on the ground
+and each link to calculate the length of each piston at each of the passed
+in positions.
+    The 2 pistons act as inputs for this mechanism, with the length of each 
+determining the angular position of one of the links ach piston will be set 
+to a constant speed, which will be expressed as a change in length per 
+frame of animation. An array of piston lengths is created by changing the 
+piston length at each position by one step length until the piston length 
+is within one step length of the next position. Once this array is complete, 
+the piston length in each frame of animation is used to calculate the 
+angles of each mechanism element relative to the positive x axis, and those 
+angles are then used to calculate coordinates of key points of the 
+mechanism in every frame. In the animation, the movable object will simply 
+move with the free end of the mechanism while it's moving between the
+object's initial and final positions. Graphs showing the piston lengths 
+over time and the object's trajectory are plotted in tandem with the
+animation.
+
 %}
 
 % to remove
@@ -20,23 +41,7 @@ mechanism_Beard_Hall(30, 40, 0, 10, 10, 40, 1)
 
 %}
 
-
-
-
 close all %closes any windows that are open still
-
-% TODO remove before submission but these are placeholders so we can easily
-
-if nargin < 4
-        %linkLgth = 50;
-        link1Lgth = 50;
-        link2Lgth = 50;
-        initX = 80;
-        initY = 20;
-        finalX = 30;
-        finalY = 70;
-        speed = 3;
-    end
 
 %TODO 
 %{ 
@@ -59,64 +64,8 @@ Grades based off of:
 %}
 
 %=============================================================================
-%% inputs and constraints
 
-    % initX and initY, coordinates for the object to be moved from
-
-    % finalX and finalY, coordinates for the object to be moved to
-
-    % All coordinate inputs must fall within a semicircle with a radius of the arm's
-    % maximum length, ie sum of hardcoded lengths for link 1 and link 2, and
-    % both y coordinate inputs must be positive (might be a good idea to
-    % have an offset equal to half the height of the movable object for
-    % simple math)
-
-%% plot elements:
-
-    %{
-    variable legend: 
-    
-    Given inputs: 
-    initX, initY:   the initial x and y positions for the object to be moved
-    finalX, finalY: the position the object should be moved to.
-    speed:          the animation speed, rads/s of ___(whatever we consider the base link)____
-   
-
-    Defined within function:
-
-    SCALAR  link1:  fixed length of link 1
-    SCALAR  link2:  fixed length of link 2
-    
-    SCALAR  x0, y0: (fixed origin of link 1)
-   
-    ARRAY: x1, y1 (end of link 1, changing) 
-
-    %}
-
-% ground, both for the mechanism and maybe the lower limit of where the
-% object can be moved to
-
-% link 1, attached to ground
-
-% link 2, attached to end of link 1, other end will be the bucket/claw/etc
-
-% crank 1, input for link 1 angular position, slides along link 1 and is
-% fixed to ground
-
-% crank 2, input for link 2 angular position, slides along link 2 and is
-% fixed to link 1
-
-% movable object
-
-% grabbing mechanism
-
-% maybe some visual indicators of the initial and final positions (we could have pale dotted objects represent these positions and have the object itself in a brighter solid line colour)
-
-%initialize fixed parameters
-%link1Lgth = linkLgth;
-%link1Lgth = 30;
-
-%link2Lgth = 35;
+%% initialize fixed parameters
 
 link1Lgth = linkLgth;
 pst1Link1 = link1Lgth*0.25; %point where piston 1 attaches to link 1 mesaured from ground
@@ -126,20 +75,16 @@ link2Lgth = linkLgth;
 pst2Link2 = link2Lgth*0.25; %point where piston 2 attaches to link 2 measured along link 2 from elbow
 pst2Link1 = link1Lgth*0.1; %point where piston 2 attaches to link 1 measured along link 1 from elbow
 
+%the origin (fixed side of link 1)
+x0 = 0;
+y0 = 0;
+
 %% Compatibility checks
-% PST2LINK1 WILL NEED TO BE SUBTRACTED FROM LINK 1 TO GET RIGHT LENGTH FOR THE PLOT
 
-maxReach = link1Lgth + link2Lgth; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
-minReach = abs(link2Lgth - link1Lgth);
-
+maxReach = link1Lgth + link2Lgth; %This length, as a diagonal, is the maximum radius of the arm's motion
 
 if min([link1Lgth, link2Lgth]) < 0
         disp("Links must only have positive lengths")
-        return
-end
-
-if (link2Lgth) > ((link1Lgth)*sqrt(2))
-        disp("Increase the length of link 1 or decrease the length of link 2")
         return
 end
 
@@ -148,33 +93,23 @@ if min([initX, initY, finalX, finalY]) < 0
         return
 end
 
-if max([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) > maxReach %%split
+if max([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) > maxReach
     disp("points too far for grabbing range, please choose points closer to the origin, or adjust link lengths")
     return
 end
 
-if min([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) < minReach
-    disp("Points out of grabbing range, please choose points further from the origin, or adjust link lengths.")
-    %fprintf(min([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) ...)
-    return
-end
-
-
-
 %% Arrays, hard coded default position assumes link 1 points straight up and link 2 is at 0 radians from + x axis
 %% for the following 2 arrays, first index is the piston or link number, and the second index is the specific position
 %% 1 = default position, 2 = initial position of object, 3 = final position
-
 
 %% Angles needed for calculating piston lengths
 linkAng = [pi/2, 0, 0; -pi/4, 0, 0];
 %% Piston lengths associated with default, initial, and final positions
 pstKeyFrames = [sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,1))),0,0; sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,1))),0,0];
 
-%% Arrays to be filled with frame specific angle or length data based on 
+%% Arrays to be filled with frame specific angle or length data
 
-
-%% interpolation between values contained in the arrays above
+% Plotting parameters
 linkPlotAng = zeros(2,0); %link angles
 pstPlotLgth = zeros(2,0); %piston lengths
 pstPlotAng = zeros(2,0); %piston angles
@@ -187,31 +122,7 @@ pst2End = zeros(2,0);
 link1End = zeros(2,0);
 link2End = zeros(2,0);
 
-%% position states and motion
-
-%the origin (fixed side of link 1)
-x0 = 0;
-y0 = 0;
-
-%link 1 initial coordinates
-%x1(1) = x0; %TODO PLACEHOLDERS change to depend on angle
-%y1(1) = y0 + link1Lgth;
-
-%link 2 coordinates
-%x2(1) = x1 + link2Lgth; %TODO PLACEHOLDERS change to depend on angle
-%y2(1) = y1;
-
-% initial, moving free end of link 2 from default position to init
-% coordinates specified by user
-
-% final, moving links 1 and 2 such that the arm moves smoothly between init
-% and final coordinates in a way that is physically possible
-
-% return to default position, go from final position back to default
-% position
-
-%% Calculating initial and final position data (CURRENTLY FOR 1ST QUADRANT ONLY)
-%% initial position
+%% Calculating initial position piston lengths
     %Convert init coordinates to a position vector
     iPosLgth = hypot(initX, initY);
     iPosAng = atan2(initY, initX); %apparently Atan takes y first
@@ -219,21 +130,12 @@ y0 = 0;
     %Calculate link angles from triangle made with init position vector
     linkAng(1,2) = acos((link1Lgth^2 + iPosLgth^2 - link2Lgth^2)/(2*link1Lgth*iPosLgth)) + iPosAng;
     linkAng(2,2) = acos((link1Lgth^2 + link2Lgth^2 - iPosLgth^2)/(2*link1Lgth*link2Lgth));
+
     %Calculate piston lengths
     pstKeyFrames(1,2) = sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,2)));
     pstKeyFrames(2,2) = sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,2)));
     
-    %superfluous but keeping around just in case
-    %{
-    %Get the angle of link 2 relative to the positive x axis for plotting
-    lnk2PltAng(2) = (link1Ang(2) - 180) + link2Ang(2);
-    %Calculate piston angles for plotting
-    pst1PltAng(2) = asin((pst1Link1*sin(link1Ang(2)))/pst1KeyFrames(2));
-    pst2PltAng(2) = (link1Ang(2) - asin((pst2Link2*sin(link2Ang(2)))/pst2KeyFrames(2))); %relative to positive x axis
-    %}
-    
-
-%% final position
+%% Calculating final position piston lengths
     %Convert init coordinates to a position vector
     fPosLgth = hypot(finalX, finalY);
     fPosAng = atan2(finalY, finalX);
@@ -245,21 +147,10 @@ y0 = 0;
     %Calculate piston lengths
     pstKeyFrames(1,3) = sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,3)));
     pstKeyFrames(2,3) = sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,3)));
-    
-    %superfluous but want to keep around just in case
-    %{
-    %Get the angle of link 2 relative to the positive x axis for plotting
-    link2PltAng(3) = (link1Ang(3) - 180) + link2Ang(3);
-    %Calculate piston angles for plotting
-    pst1PltAng(3) = asin((pst1Link1*sin(link1Ang(3)))/pst1KeyFrames(3));
-    pst2PltAng(3) = (link1Ang(3) - asin((pst2Link2*sin(link2Ang(3)))/pst2KeyFrames(2))); %relative to positive x axis
-    %}
    
 %% Creating frames for animation
-    fps = 60; %frames per second [frames/second]
+    fps = 60; %frames per second
     pstFrameStep = speed/60; %piston length change per frame    
-
-
 
     %% defualt to initial
 
@@ -383,8 +274,8 @@ y0 = 0;
         end
     end
     
-    %Calculate angles of all plot elements relative to positive x axis for each
-    %frame based on piston lengths
+    % Calculate angles of all plot elements relative to positive x axis for each
+    % frame based on piston lengths
     for i = 1:length(pstPlotLgth)
         pstPlotAng(1,i) = pi - acos((pstPlotLgth(1,i)^2+pst1Grnd^2-pst1Link1^2)/(2*pstPlotLgth(1,i)*pst1Grnd));
         linkPlotAng(1,i) = acos((pst1Link1^2+pst1Grnd^2-pstPlotLgth(1,i)^2)/(2*pst1Link1*pst1Grnd));
@@ -420,13 +311,11 @@ y0 = 0;
 
     %% movable object initialisation
     
-    
     %moveable object parameters:
     radius = 0.05*linkLgth; 
     
     %grabbing num of frames
     num_frames = length(pstPlotLgth);
-
 
     %initialising positions for ball
     objX = zeros(1, num_frames);
@@ -436,7 +325,6 @@ y0 = 0;
     objX(1:diTotal) = initX;
     objY(1:diTotal) = initY;
 
-    
     %object follows link 2 end coordinates from initial to final
     carry_frames = (diTotal + 1):(diTotal + ifTotal); %frame indices for following link 2
     objX(carry_frames) = link2End(1, carry_frames);
@@ -446,26 +334,9 @@ y0 = 0;
     drop_frames = (diTotal + ifTotal):num_frames; %frame indices for final position
     objX(drop_frames) = objX(diTotal + ifTotal);
     objY(drop_frames) = objY(diTotal + ifTotal);
-    
 
     %position matrix for rectangle object acting as ball
     obj_pos = [objX - radius; objY - radius; repmat(2*radius, 1, num_frames); repmat(2*radius, 1, num_frames)];
-
-
-    %% Possible constraints
-%{
-    1. Position of ends of link 1 and link 2 must always be in the first 2
-    quadrants relative to the origin where link 1 attached to the ground
-    2. Input angle for crank 1 must be between 0 and pi rads, while crank 2
-    can rotate between 0 and 2 pi rads (one-way or both ways)
-    3. Links will only move one at a time
-%}
-
-
-    %{
-since link length is fixed, 
-    %}
-
 
     %% graphing
 
@@ -475,29 +346,8 @@ span1 = hypot(pst1End(1, :) - pst1Grnd, pst1End(2, :));
 span2 = hypot(pst2End(1, :) - pst2Start(1, :), pst2End(2, :) - pst2Start(2, :));
 
 deltaTime =  (1:size(pstPlotLgth, 2)) ./ fps; %time in seconds
-    
-
-%plot piston length over time
-% pst1End(1,i) is x values 
-%pst1End(1, i) is y values
-
-%hypot( , initY);
-% hyp pst1End(1,i)-% pst1End(1,i) is x values
-
-
-
-
-% piston 2: 
-
-
-%plot x and y of object trajectory
-
-
-
-
 
 %% Animations
-% TODO: move code below this up only when variables are needed further up
 
 %% Creating Figure
 
@@ -505,7 +355,6 @@ deltaTime =  (1:size(pstPlotLgth, 2)) ./ fps; %time in seconds
 
     figure('Position', [100, 100, 1200, 1000]) %makes the empty figure for the animation
     set(gcf, 'Color', '#D3E2E8'); %makes the background blue
-
 
 ax1 = subplot(6, 1, [1 3]); %adds the plot, maybe leaving space for a text box at (2 1 2) that can explain ?
 hold on %allows everything here to be added to same figure
@@ -520,12 +369,7 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
         xmax = 1.2 * max([x0, pst1Grnd, initX, finalX, link1End(1,:), link2End(1,:), pst1End(1,:), pst2Start(1,:), pst2End(1,:), objX]);     % 120% safety margin on extended position of crank, to be changed
         ymin = 1.2 * min([-5, min([y0, initY, finalY, link1End(2,:), link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY])]);               % takes smallest of (lowest crank position or offset), subtracts half r3 for margin
         ymax = 1.2 * max([y0, initY, finalY, link1End(2,:), link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY]);               % same as ymin but in positive direction
-
-        
-        %link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY
-        %%one of these causes mixed numbers at certain values
       
-
         %axis([xmin, xmax, ymin, ymax])
         xlim([xmin, xmax]);
         ylim([ymin, ymax]);
@@ -574,7 +418,6 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
      
      plot1mark = plot(deltaTime(1), span1(1), 'bo', 'MarkerFaceColor', 'r'); %adds a marker to the time graph for current angle at current time
      plot2mark = plot(deltaTime(1), span2(1), 'bo', 'MarkerFaceColor', 'm'); %adds a marker to the time graph for current angle at current time
-    
         
      %yyaxis right
      %ylabel('Angle (deg)');
@@ -584,8 +427,6 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
     
     pause(1)   
 
-
-
  ax3 = subplot(6, 1, 6); %text box
 
  hold on;
@@ -593,7 +434,6 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
      obj_x = plot(deltaTime, objX, 'linewidth', 2, 'Color', 'k');  %draws the graph
 
      obj_y = plot(deltaTime, objY, 'linewidth', 2, 'Color', 'g');  %draws the graph
-
 
         str = {'Inspired by toy robotics kits, this project animates ',... ...
             'a hydraulic arm that can grab and move a ball from ',...
@@ -608,7 +448,6 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
             'FontSize', 12);
                     
 hold off
-
 
 %% Frame updates for both plots
 
