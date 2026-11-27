@@ -21,14 +21,15 @@ determining the angular position of one of the links ach piston will be set
 to a constant speed, which will be expressed as a change in length per 
 frame of animation. An array of piston lengths is created by changing the 
 piston length at each position by one step length until the piston length 
-is within one step length of the next position. Once this array is complete, 
-the piston length in each frame of animation is used to calculate the 
-angles of each mechanism element relative to the positive x axis, and those 
-angles are then used to calculate coordinates of key points of the 
-mechanism in every frame. In the animation, the movable object will simply 
-move with the free end of the mechanism while it's moving between the
-object's initial and final positions. Graphs showing the piston lengths 
-over time and the object's trajectory are plotted in tandem with the
+is within one step length of the next position. 
+    Once this array is complete, the piston length in each frame of 
+animation is used to calculate the angles of each mechanism element 
+relative to the positive x axis, and those angles are then used to 
+calculate coordinates of key points of the mechanism in every frame. In the 
+animation, the movable object will simply move with the free end of the 
+mechanism while it's moving between the object's initial and final 
+positions. Graphs showing the piston lengths over time and the object's 
+path between the initial and final positions are plotted in tandem with the
 animation.
 
 %}
