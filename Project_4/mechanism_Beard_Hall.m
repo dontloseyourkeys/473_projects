@@ -144,12 +144,12 @@ x0 = 0;
 y0 = 0;
 
 %link 1 initial coordinates
-x1(1) = x0; %TODO PLACEHOLDERS change to depend on angle
-y1(1) = y0 + link1Lgth;
+%x1(1) = x0; %TODO PLACEHOLDERS change to depend on angle
+%y1(1) = y0 + link1Lgth;
 
 %link 2 coordinates
-x2(1) = x1 + link2Lgth; %TODO PLACEHOLDERS change to depend on angle
-y2(1) = y1;
+%x2(1) = x1 + link2Lgth; %TODO PLACEHOLDERS change to depend on angle
+%y2(1) = y1;
 
 % initial, moving free end of link 2 from default position to init
 % coordinates specified by user
@@ -388,14 +388,13 @@ y2(1) = y1;
     objY(carry_frames) = link2End(2, carry_frames);
 
     %obj stays at final position 
-    drop_frames = (diTotal + ifTotal + 1):num_frames; %frame indices for final position
+    drop_frames = (diTotal + ifTotal):num_frames; %frame indices for final position
     objX(drop_frames) = objX(diTotal + ifTotal);
     objY(drop_frames) = objY(diTotal + ifTotal);
     
 
     %position matrix for rectangle object acting as ball
     obj_pos = [objX - radius; objY - radius; repmat(2*radius, 1, num_frames); repmat(2*radius, 1, num_frames)];
-    size(obj_pos)
 
 
     %% Possible constraints
@@ -408,14 +407,20 @@ y2(1) = y1;
 %}
 
 
+    %{
+since link length is fixed, 
+    %}
+
 
 
 %% Animations
 % TODO: move code below this up only when variables are needed further up
 
 %% Creating Figure
-% figure('Position', [100, 100, 1200, 600]) %makes the empty figure for the animation
+
     clf %clears figure if this function is run multiple times in a row
+
+     figure('Position', [100, 100, 1200, 800]) %makes the empty figure for the animation
     set(gcf, 'Color', '#D3E2E8'); %makes the background blue
 
 
@@ -425,25 +430,41 @@ hold on %allows everything here to be added to same figure
 title('Project 4: Hydraulic 2 Segment Claw Arm');
 
 
-axis equal % sets axes to equal
+
+
+% Setting reasonable axes
+   axis equal % sets axes to equal
+        
+        % finds appropriate window bounds
+        xmin = 1.2 * min([x0, pst1Grnd, initX, finalX, link1End(1,:), link2End(1,:), pst1End(1,:), pst2Start(1,:), pst2End(1,:), objX]);  %uses all x vals    % 120% safety margin on leftmost position of the crank
+        xmax = 1.2 * max([x0, pst1Grnd, initX, finalX, link1End(1,:), link2End(1,:), pst1End(1,:), pst2Start(1,:), pst2End(1,:), objX]);     % 120% safety margin on extended position of crank, to be changed
+        ymin = 1.2 * min([-5, min([y0, initY, finalY, link1End(2,:), link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY])]);               % takes smallest of (lowest crank position or offset), subtracts half r3 for margin
+        ymax = 1.2 * max([y0, initY, finalY, link1End(2,:), link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY]);               % same as ymin but in positive direction
+         
+        %axis([xmin, xmax, ymin, ymax])
+        xlim([xmin, xmax]);
+        ylim([ymin, ymax]);
 
     % Initial frame
     
         %plot object handles
-            ground = line([(x0 -5) (x0+5)],[0 0],'linewidth', 2,'color','#0C8A11', 'LineStyle', '--'); %plot object for ground, does not need updating per frame
 
+             % initial and final object positions: (should not move)
+             init_object = rectangle('Position', [initX - radius, initY - radius, 2*radius, 2*radius],...
+                 'Curvature', [1 1], 'FaceColor', 'w', 'EdgeColor', 'b', 'LineWidth', 1.5, 'LineStyle', '--');
+
+             final_object = rectangle('Position', [finalX - radius, finalY - radius, 2*radius, 2*radius],...
+                 'Curvature', [1 1], 'FaceColor', 'w', 'EdgeColor', 'b', 'LineWidth', 1.5, 'LineStyle', '--');
+
+            ground = line([(x0-10) (x0+10)],[0 0],'linewidth', 2,'color','#0C8A11', 'LineStyle', '--'); %plot object for ground, does not need updating per frame
+
+            %plot object handles for animating
             links = plot([x0 link1End(1,1) link2End(1,1)],[y0 link1End(2,1) link2End(2,1)],'-o','linewidth',2, 'Color', 'b'); %plot obejct for rocker arm, spans from p0-p3
             
             piston1 = plot([pst1Grnd pst1End(1,1)],[0 pst1End(2,1)],'-o','linewidth',2, 'Color', 'r'); %plots piston connected to ground
 
             piston2 = plot([pst2Start(1,1) pst2End(1,1)],[pst2Start(2,1) pst2End(2,1)],'-o','linewidth',2, 'Color', 'r'); %plots piston at link elbow
             
-            % initial and final object positions: (should not move)
-             init_object = rectangle('Position', [initX - radius, initY - radius, 2*radius, 2*radius],...
-                 'Curvature', [1 1], 'FaceColor', 'w', 'EdgeColor', 'b', 'LineWidth', 1.5, 'LineStyle', '--');
-
-             final_object = rectangle('Position', [finalX - radius, finalY - radius, 2*radius, 2*radius],...
-                 'Curvature', [1 1], 'FaceColor', 'w', 'EdgeColor', 'b', 'LineWidth', 1.5, 'LineStyle', '--');
 
             % moveable object
             m_object = rectangle('Position', obj_pos(:, 1),...
