@@ -12,6 +12,17 @@ finalX, finalY: the position the object should be moved to.
 speed: the animation speed, piston length change per second
 %}
 
+% to remove
+
+%{
+test cases that present odd behavior: 
+mechanism_Beard_Hall(30, 40, 0, 10, 10, 40, 1)
+
+%}
+
+
+
+
 close all %closes any windows that are open still
 
 % TODO remove before submission but these are placeholders so we can easily
@@ -459,10 +470,10 @@ since link length is fixed,
 
 %array for holding 
 
-span1 = hypot(pst1End(1, :) - pst1Grnd, pst1End(2, :))
-span2 = hypot(pst2End(1, :) - pst2Start(1, :), pst2End(2, :) - pst2Start(2, :))
+span1 = hypot(pst1End(1, :) - pst1Grnd, pst1End(2, :));
+span2 = hypot(pst2End(1, :) - pst2Start(1, :), pst2End(2, :) - pst2Start(2, :));
 
-deltaTime =  (1:size(pstPlotLgth, 2)) ./ fps %time in seconds
+deltaTime =  (1:size(pstPlotLgth, 2)) ./ fps; %time in seconds
     
 
 %plot piston length over time
@@ -491,11 +502,11 @@ deltaTime =  (1:size(pstPlotLgth, 2)) ./ fps %time in seconds
 
     clf %clears figure if this function is run multiple times in a row
 
-    figure('Position', [100, 100, 1200, 800]) %makes the empty figure for the animation
+    figure('Position', [100, 100, 1200, 1000]) %makes the empty figure for the animation
     set(gcf, 'Color', '#D3E2E8'); %makes the background blue
 
 
-ax1 = subplot(4, 1, [1 2]); %adds the plot, maybe leaving space for a text box at (2 1 2) that can explain ?
+ax1 = subplot(6, 1, [1 3]); %adds the plot, maybe leaving space for a text box at (2 1 2) that can explain ?
 hold on %allows everything here to be added to same figure
 
 title('Project 4: Hydraulic 2 Segment Claw Arm');
@@ -536,13 +547,13 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
             
             piston1 = plot([pst1Grnd pst1End(1,1)],[0 pst1End(2,1)],'-o','linewidth',2, 'Color', 'r'); %plots piston connected to ground
 
-            piston2 = plot([pst2Start(1,1) pst2End(1,1)],[pst2Start(2,1) pst2End(2,1)],'-o','linewidth',2, 'Color', 'r'); %plots piston at link elbow
+            piston2 = plot([pst2Start(1,1) pst2End(1,1)],[pst2Start(2,1) pst2End(2,1)],'-o','linewidth',2, 'Color', 'm'); %plots piston at link elbow
             
             % moveable object
             m_object = rectangle('Position', obj_pos(:, 1),...
                  'Curvature', [1 1], 'FaceColor', 'b', 'EdgeColor', 'k', 'LineWidth', 1.5);
 
- ax2 = subplot(4, 1, 3); %graph space
+ ax2 = subplot(6, 1, [4 5]); %graph space
 
     hold on;
     yyaxis left %adds left axis stuff and plots relative to that
@@ -551,17 +562,17 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
         ylabel('Piston 1 length');
         grid on
         
-        %ylim([(1.2 * min(phi)), (1.2 * max(phi))]); %sets y limits to 1.2 times extreme vals
+        ylim([0, 1.2 * max([span1, span2])]); %sets y limits to 1.2 times extreme vals
         
         %rad_lims = ylim;
     
         title('Graph 1');
 
-     span1plot = plot(deltaTime, span1, 'linewidth', 2, 'Color', 'k');  %draws the graph
-     span2plot = plot(deltaTime, span2, 'linewidth', 2, 'Color', 'k');  %draws the graph
-   
+     span1plot = plot(deltaTime, span1, 'linewidth', 2, 'Color', 'r');  %draws the graph
+     span2plot = plot(deltaTime, span2, 'linewidth', 2, 'Color', 'm');  %draws the graph
      
-     % phi_mark = plot(time(1), phi(1), 'bo', 'MarkerFaceColor', 'b'); %adds a marker to the time graph for current angle at current time
+     plot1mark = plot(deltaTime(1), span1(1), 'bo', 'MarkerFaceColor', 'r'); %adds a marker to the time graph for current angle at current time
+     plot2mark = plot(deltaTime(1), span2(1), 'bo', 'MarkerFaceColor', 'm'); %adds a marker to the time graph for current angle at current time
     
         
      %yyaxis right
@@ -574,9 +585,11 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
 
 
 
- ax3 = subplot(4, 1, 4); %text box
+ ax3 = subplot(6, 1, 6); %text box
 
+     span1plot = plot(deltaTime, span1, 'linewidth', 2, 'Color', 'r');  %draws the graph
 
+     
         str = {'Inspired by toy robotics kits, this project animates ',... ...
             'a hydraulic arm that can grab and move a ball from ',...
             'an initial position to a final position. The',...
@@ -605,6 +618,10 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
         set(piston2,'XData',[pst2Start(1,i) pst2End(1,i)],'YData',[pst2Start(2,i) pst2End(2,i)]);
 
         set(m_object, 'Position', obj_pos(:, i));
+
+        %graphs 
+        set(plot1mark, 'XData', deltaTime(i), 'YData', span1(i));
+        set(plot2mark, 'XData', deltaTime(i), 'YData', span2(i));
 
     end %update end
 
