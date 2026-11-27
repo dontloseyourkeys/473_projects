@@ -1,11 +1,11 @@
-function [] = mechanism_Beard_Hall(initX, initY, finalX, finalY, speed)
+function [] = mechanism_Beard_Hall(linkLgth, initX, initY, finalX, finalY, speed)
 %% Function Description
 %{
 This function mechanism_Beard_Hall takes inputs 
 ______ and animates a
 hydraulic robotic claw arm that can move an object.
 
-
+linkLgth: the length of the 2 links
 initX, initY: the initial x and y positions for the object to be moved
 finalX, finalY: the position the object should be moved to.
 speed: the animation speed, piston length change per second
@@ -19,6 +19,7 @@ close all %closes any windows that are open still
 % TODO remove before submission but these are placeholders so we can easily
 % test
 if nargin < 4
+        linkLgth = 50;
         initX = 80;
         initY = 20;
         finalX = 30;
@@ -103,10 +104,10 @@ Grades based off of:
 % maybe some visual indicators of the initial and final positions (we could have pale dotted objects represent these positions and have the object itself in a brighter solid line colour)
 
 %initialize fixed parameters
-link1Lgth = 50;
+link1Lgth = linkLgth;
 pst1Link1 = link1Lgth*0.25; %point where piston 1 attaches to link 1 mesaured from ground
 pst1Grnd = link1Lgth*0.1; %point where piston 1 attaches to ground measured as distance from arm base/origin
-link2Lgth = 50;
+link2Lgth = linkLgth;
 pst2Link2 = link2Lgth*0.25; %point where piston 2 attaches to link 2 measured along link 2 from elbow
 pst2Link1 = link1Lgth*0.1; %point where piston 2 attaches to link 1 measured along link 1 from elbow
 
@@ -114,6 +115,19 @@ pst2Link1 = link1Lgth*0.1; %point where piston 2 attaches to link 1 measured alo
 %% PST2LINK1 WILL NEED TO BE SUBTRACTED FROM LINK 1 TO GET RIGHT LENGTH FOR THE PLOT
 
 maxReach = link1Lgth + link2Lgth; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
+minReach = min([(link1Lgth - link2Lgth) (link2Lgth - link1Lgth)]);
+
+if max([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) > maxReach
+    disp("points too far for grabbing range, please choose points closer to the origin, or adjust link lengths")
+    return
+end
+
+if min([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) < minReach
+    disp("Points out of grabbing range, please choose points further from the origin, or adjust link lengths.")
+    %fprintf(min([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) ...)
+    return
+end
+
 
 %% Arrays, hard coded default position assumes link 1 points straight up and link 2 is at 0 radians from + x axis
 %% for the following 2 arrays, first index is the piston or link number, and the second index is the specific position
@@ -430,17 +444,18 @@ hold on %allows everything here to be added to same figure
 title('Project 4: Hydraulic 2 Segment Claw Arm');
 
 
-
-
 % Setting reasonable axes
    axis equal % sets axes to equal
         
         % finds appropriate window bounds
-        xmin = 1.2 * min([x0, pst1Grnd, initX, finalX, link1End(1,:), link2End(1,:), pst1End(1,:), pst2Start(1,:), pst2End(1,:), objX]);  %uses all x vals    % 120% safety margin on leftmost position of the crank
+        xmin = 1.2 * min([-5 min([x0, pst1Grnd, initX, finalX, link1End(1,:), link2End(1,:), pst1End(1,:), pst2Start(1,:), pst2End(1,:), objX])]);  %uses all x vals    % 120% safety margin on leftmost position of the crank
         xmax = 1.2 * max([x0, pst1Grnd, initX, finalX, link1End(1,:), link2End(1,:), pst1End(1,:), pst2Start(1,:), pst2End(1,:), objX]);     % 120% safety margin on extended position of crank, to be changed
         ymin = 1.2 * min([-5, min([y0, initY, finalY, link1End(2,:), link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY])]);               % takes smallest of (lowest crank position or offset), subtracts half r3 for margin
         ymax = 1.2 * max([y0, initY, finalY, link1End(2,:), link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY]);               % same as ymin but in positive direction
-         
+
+        
+        link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY
+
         %axis([xmin, xmax, ymin, ymax])
         xlim([xmin, xmax]);
         ylim([ymin, ymax]);
@@ -476,7 +491,9 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
 
         str = {'Inspired by toy robotics kits, this project animates ',... ...
             'a hydraulic arm that can grab and move a ball from ',...
-            'an initial position to a final position',...
+            'an initial position to a final position. The',...
+            ['red links are the hydraulic pistons, and the ' ...
+            'blue links are the arms'],...
             };
         
         text(0.5, 0.5, str, ...
