@@ -295,7 +295,6 @@ link2End = zeros(2,0);
         link2End(1,i) = link1Lgth*cos(linkPlotAng(1,i)) + link2Lgth*cos(linkPlotAng(2,i));
         link2End(2,i) = link1Lgth*sin(linkPlotAng(1,i)) + link2Lgth*sin(linkPlotAng(2,i));
         
-        
         %coordinates of the end of piston 1, start is fixed at (pst1Grnd, 0)
         pst1End(1,i) = pstPlotLgth(1,i)*cos(pstPlotAng(1,i)) + pst1Grnd;
         pst1End(2,i) = pstPlotLgth(1,i)*sin(pstPlotAng(1,i));
@@ -308,6 +307,13 @@ link2End = zeros(2,0);
         pst2End(1,i) = (link1Lgth - pst2Link1)*cos(linkPlotAng(1,i)) + pstPlotLgth(2,i)*cos(pstPlotAng(2,i));
         pst2End(2,i) = (link1Lgth - pst2Link1)*sin(linkPlotAng(1,i)) + pstPlotLgth(2,i)*sin(pstPlotAng(2,i));
     end
+
+    if any(link2End(2,:) < 0)
+        disp("Resulting motion would put the free end of the arm below the ground. " + ...
+            "Please increase the smallet y coordinate.")
+        return
+    end
+
 %% using the calculated values for the obj position array
 
     %% movable object initialisation
@@ -354,9 +360,6 @@ deltaTime =  (1:size(pstPlotLgth, 2)) ./ fps; %time in seconds
 
     clf %clears figure if this function is run multiple times in a row
 
-    figure('Position', [100, 100, 1200, 1000]) %makes the empty figure for the animation
-    set(gcf, 'Color', '#D3E2E8'); %makes the background blue
-
 ax1 = subplot(6, 2, [1, 3, 5]); %The animation
 hold on %allows everything here to be added to same figure
 
@@ -399,30 +402,26 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
             m_object = rectangle('Position', obj_pos(:, 1),...
                  'Curvature', [1 1], 'FaceColor', 'b', 'EdgeColor', 'k', 'LineWidth', 1.5);
 
- ax2 = subplot(6, 2, [7, 8, 9, 10, 11, 12]); %Piston length vs time graph
+ ax2 = subplot(6, 2, [9, 10, 11, 12]); %Piston length vs time graph
 
     hold on;
     yyaxis left %adds left axis stuff and plots relative to that
     
         xlabel('Time (s)');
-        ylabel('Piston 1 length');
+        ylabel('length');
         grid on
         
         ylim([0, 1.2 * max([span1, span2])]); %sets y limits to 1.2 times extreme vals
         
         %rad_lims = ylim;
     
-        title('Graph 1');
+        title('Piston lengths overtime');
 
      span1plot = plot(deltaTime, span1, 'linewidth', 2, 'Color', 'r');  %draws the graph
      span2plot = plot(deltaTime, span2, 'linewidth', 2, 'Color', 'm');  %draws the graph
      
      plot1mark = plot(deltaTime(1), span1(1), 'bo', 'MarkerFaceColor', 'r'); %adds a marker to the time graph for current angle at current time
      plot2mark = plot(deltaTime(1), span2(1), 'bo', 'MarkerFaceColor', 'm'); %adds a marker to the time graph for current angle at current time
-        
-     %yyaxis right
-     %ylabel('Angle (deg)');
-     %ylim(rad2deg(rad_lims));
     
     hold off;
     
@@ -431,6 +430,8 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
  
  ax3 = subplot(6,2,[2,4,6]); %object path graph
     hold on;
+    
+    title('Object Path');
 
     xmin = 1.2 * min([-5 min([x0, pst1Grnd, initX, finalX, link1End(1,:), link2End(1,:), pst1End(1,:), pst2Start(1,:), pst2End(1,:), objX])]);  %uses all x vals    % 120% safety margin on leftmost position of the crank
     xmax = 1.2 * max([x0, pst1Grnd, initX, finalX, link1End(1,:), link2End(1,:), pst1End(1,:), pst2Start(1,:), pst2End(1,:), objX]);     % 120% safety margin on extended position of crank, to be changed
