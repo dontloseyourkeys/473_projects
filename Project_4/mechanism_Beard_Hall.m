@@ -310,7 +310,7 @@ link2End = zeros(2,0);
 
     if any(link2End(2,:) < 0)
         disp("Resulting motion would put the free end of the arm below the ground. " + ...
-            "Please increase the smallet y coordinate.")
+            "Please try different coordinates.")
         return
     end
 
