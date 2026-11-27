@@ -282,10 +282,7 @@ else %deepest nested if, ends on last line. the rest of the code only executes i
                         elseif graph_title == 3 %'rocker'
                            title('P1B: Animation of Inverted Slider Crank-Rocker Mechanism: Quick-return planing machine');
                         end
-            
-            % Setting reasonable axes
-               axis equal % sets axes to equal
-               
+              axis equal % sets axes to equal
                     % finds appropriate window bounds
                     xmin = 1.2 * min([-r1 min([x3]) r5]);      % 120% safety margin on leftmost position of the crank
                     xmax = 1.2 * max([r1 max([x3]) r5]);     % 120% safety margin on extended position of crank, to be changed

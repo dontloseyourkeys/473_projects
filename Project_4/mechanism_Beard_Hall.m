@@ -1,4 +1,5 @@
 function [] = mechanism_Beard_Hall(linkLgth, initX, initY, finalX, finalY, speed)
+
 %% Function Description
 %{
 This function mechanism_Beard_Hall takes inputs 
@@ -69,8 +70,7 @@ Grades based off of:
     initX, initY:   the initial x and y positions for the object to be moved
     finalX, finalY: the position the object should be moved to.
     speed:          the animation speed, rads/s of ___(whatever we consider the base link)____
-    
-        
+   
 
     Defined within function:
 
@@ -78,8 +78,7 @@ Grades based off of:
     SCALAR  link2:  fixed length of link 2
     
     SCALAR  x0, y0: (fixed origin of link 1)
-    
-
+   
     ARRAY: x1, y1 (end of link 1, changing) 
 
     %}
@@ -104,10 +103,16 @@ Grades based off of:
 % maybe some visual indicators of the initial and final positions (we could have pale dotted objects represent these positions and have the object itself in a brighter solid line colour)
 
 %initialize fixed parameters
-link1Lgth = linkLgth;
-pst1Link1 = link1Lgth*0.25; %point where piston 1 attaches to link 1 mesaured from ground
+%link1Lgth = linkLgth;
+%link1Lgth = 30;
+
+%link2Lgth = 35;
+
+%link1Lgth = linkLgth;
+%pst1Link1 = link1Lgth*0.25; %point where piston 1 attaches to link 1 mesaured from ground
 pst1Grnd = link1Lgth*0.1; %point where piston 1 attaches to ground measured as distance from arm base/origin
-link2Lgth = linkLgth;
+
+%link2Lgth = linkLgth;
 pst2Link2 = link2Lgth*0.25; %point where piston 2 attaches to link 2 measured along link 2 from elbow
 pst2Link1 = link1Lgth*0.1; %point where piston 2 attaches to link 1 measured along link 1 from elbow
 
@@ -115,9 +120,9 @@ pst2Link1 = link1Lgth*0.1; %point where piston 2 attaches to link 1 measured alo
 %% PST2LINK1 WILL NEED TO BE SUBTRACTED FROM LINK 1 TO GET RIGHT LENGTH FOR THE PLOT
 
 maxReach = link1Lgth + link2Lgth; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
-minReach = min([(link1Lgth - link2Lgth) (link2Lgth - link1Lgth)]);
+minReach = abs(link2Lgth - link1Lgth)
 
-if max([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) > maxReach
+if max([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) > maxReach %%split
     disp("points too far for grabbing range, please choose points closer to the origin, or adjust link lengths")
     return
 end
@@ -127,6 +132,11 @@ if min([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) < minReach
     %fprintf(min([sqrt(initX^2 + initY^2) sqrt(finalX^2 + finalY^2)]) ...)
     return
 end
+
+%if min([initX, initY, finalX, finalY]) < 0;
+
+
+
 
 
 %% Arrays, hard coded default position assumes link 1 points straight up and link 2 is at 0 radians from + x axis
@@ -195,6 +205,7 @@ y0 = 0;
     pst2PltAng(2) = (link1Ang(2) - asin((pst2Link2*sin(link2Ang(2)))/pst2KeyFrames(2))); %relative to positive x axis
     %}
     
+
 %% final position
     %Convert init coordinates to a position vector
     fPosLgth = hypot(finalX, finalY);
@@ -434,15 +445,14 @@ since link length is fixed,
 
     clf %clears figure if this function is run multiple times in a row
 
-     figure('Position', [100, 100, 1200, 800]) %makes the empty figure for the animation
+    figure('Position', [100, 100, 1200, 800]) %makes the empty figure for the animation
     set(gcf, 'Color', '#D3E2E8'); %makes the background blue
 
 
-ax1 = subplot(3, 1, [1 2]); %adds the plot, maybe leaving space for a text box at (2 1 2) that can explain ?
+ax1 = subplot(4, 1, [1 2]); %adds the plot, maybe leaving space for a text box at (2 1 2) that can explain ?
 hold on %allows everything here to be added to same figure
 
 title('Project 4: Hydraulic 2 Segment Claw Arm');
-
 
 % Setting reasonable axes
    axis equal % sets axes to equal
@@ -454,7 +464,9 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
         ymax = 1.2 * max([y0, initY, finalY, link1End(2,:), link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY]);               % same as ymin but in positive direction
 
         
-        link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY
+        %link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY
+        %%one of these causes mixed numbers at certain values
+      
 
         %axis([xmin, xmax, ymin, ymax])
         xlim([xmin, xmax]);
@@ -480,13 +492,27 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
 
             piston2 = plot([pst2Start(1,1) pst2End(1,1)],[pst2Start(2,1) pst2End(2,1)],'-o','linewidth',2, 'Color', 'r'); %plots piston at link elbow
             
-
             % moveable object
             m_object = rectangle('Position', obj_pos(:, 1),...
                  'Curvature', [1 1], 'FaceColor', 'b', 'EdgeColor', 'k', 'LineWidth', 1.5);
 
+ ax2 = subplot(4, 1, 3); %graph space
 
- ax2 = subplot(3, 1, 3); %text box
+
+%plot piston length over time
+
+%piston 1:
+
+%piston 2:
+
+
+%plot x and y of object trajectory
+
+
+
+
+
+ ax3 = subplot(4, 1, 4); %text box
 
 
         str = {'Inspired by toy robotics kits, this project animates ',... ...
