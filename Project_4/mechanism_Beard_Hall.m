@@ -357,7 +357,7 @@ deltaTime =  (1:size(pstPlotLgth, 2)) ./ fps; %time in seconds
     figure('Position', [100, 100, 1200, 1000]) %makes the empty figure for the animation
     set(gcf, 'Color', '#D3E2E8'); %makes the background blue
 
-ax1 = subplot(6, 1, [1 3]); %adds the plot, maybe leaving space for a text box at (2 1 2) that can explain ?
+ax1 = subplot(6, 2, [1, 3, 5]); %The animation
 hold on %allows everything here to be added to same figure
 
 title('Project 4: Hydraulic 2 Segment Claw Arm');
@@ -399,7 +399,7 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
             m_object = rectangle('Position', obj_pos(:, 1),...
                  'Curvature', [1 1], 'FaceColor', 'b', 'EdgeColor', 'k', 'LineWidth', 1.5);
 
- ax2 = subplot(6, 1, [4 5]); %graph space
+ ax2 = subplot(6, 2, [7, 8, 9, 10, 11, 12]); %Piston length vs time graph
 
     hold on;
     yyaxis left %adds left axis stuff and plots relative to that
@@ -428,7 +428,25 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
     
     pause(1)   
 
- ax3 = subplot(6, 1, 6); %text box
+ 
+ ax3 = subplot(6,2,[2,4,6]); %object path graph
+    hold on;
+
+    xmin = 1.2 * min([-5 min([x0, pst1Grnd, initX, finalX, link1End(1,:), link2End(1,:), pst1End(1,:), pst2Start(1,:), pst2End(1,:), objX])]);  %uses all x vals    % 120% safety margin on leftmost position of the crank
+    xmax = 1.2 * max([x0, pst1Grnd, initX, finalX, link1End(1,:), link2End(1,:), pst1End(1,:), pst2Start(1,:), pst2End(1,:), objX]);     % 120% safety margin on extended position of crank, to be changed
+    ymin = 1.2 * min([-5, min([y0, initY, finalY, link1End(2,:), link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY])]);               % takes smallest of (lowest crank position or offset), subtracts half r3 for margin
+    ymax = 1.2 * max([y0, initY, finalY, link1End(2,:), link2End(2,:), pst1End(2,:), pst2Start(2,:), pst2End(2,:), objY]);               % same as ymin but in positive direction
+
+    %axis([xmin, xmax, ymin, ymax])
+    xlim([xmin, xmax]);
+    ylim([ymin, ymax]);
+
+    pathPlot = plot(obj_pos(1,:),obj_pos(2,:), 'LineWidth', 1, 'Color', 'y');
+    pathMark = plot(obj_pos(:,1),obj_pos(:,1), 'bo', 'MarkerFaceColor','y','MarkerSize',10);
+    hold off;
+ 
+%{
+ ax4 = subplot(6, 2, 2); %text box
 
  hold on;
 
@@ -449,6 +467,7 @@ title('Project 4: Hydraulic 2 Segment Claw Arm');
             'FontSize', 12);
                     
 hold off
+%}
 
 %% Frame updates for both plots
 
@@ -466,6 +485,7 @@ hold off
         %graphs 
         set(plot1mark, 'XData', deltaTime(i), 'YData', span1(i));
         set(plot2mark, 'XData', deltaTime(i), 'YData', span2(i));
+        set(pathMark, 'XData', obj_pos(1,i), 'YData', obj_pos(2,i));
 
     end %update end
 
