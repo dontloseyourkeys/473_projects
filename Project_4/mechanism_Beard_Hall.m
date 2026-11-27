@@ -1,7 +1,8 @@
 function [] = mechanism_Beard_Hall(initX, initY, finalX, finalY, speed)
 %% Function Description
 %{
-This function mechanism_Beard_Hall takes inputs ______ and animates a
+This function mechanism_Beard_Hall takes inputs 
+______ and animates a
 hydraulic robotic claw arm that can move an object.
 
 
@@ -20,8 +21,8 @@ close all %closes any windows that are open still
 if nargin < 4
         initX = 80;
         initY = 20;
-        finalX = 20;
-        finalY = 80;
+        finalX = 30;
+        finalY = 70;
         speed = 3;
     end
 
@@ -108,6 +109,8 @@ pst1Grnd = link1Lgth*0.1; %point where piston 1 attaches to ground measured as d
 link2Lgth = 50;
 pst2Link2 = link2Lgth*0.25; %point where piston 2 attaches to link 2 measured along link 2 from elbow
 pst2Link1 = link1Lgth*0.1; %point where piston 2 attaches to link 1 measured along link 1 from elbow
+
+
 %% PST2LINK1 WILL NEED TO BE SUBTRACTED FROM LINK 1 TO GET RIGHT LENGTH FOR THE PLOT
 
 maxReach = link1Lgth + link2Lgth; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
@@ -117,7 +120,7 @@ maxReach = link1Lgth + link2Lgth; %This length, as a diagonal, will be used to e
 %% 1 = default position, 2 = initial position of object, 3 = final position
 %% Angles needed for calculating piston lengths
 linkAng = [pi/2, 0, 0; -pi/4, 0, 0];
-%% Pistion lengths associated with default, initial, and final positions
+%% Piston lengths associated with default, initial, and final positions
 pstKeyFrames = [sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,1))),0,0; sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,1))),0,0];
 
 %% Arrays to be filled with frame specific angle or length data based on 
@@ -161,7 +164,7 @@ y2(1) = y1;
 %% initial position
     %Convert init coordinates to a position vector
     iPosLgth = hypot(initX, initY);
-    iPosAng = atan2(initX, initY);
+    iPosAng = atan2(initY, initX); %apparently Atan takes y first
     %Calculate link angles from triangle made with init position vector
     linkAng(1,2) = acos((link1Lgth^2 + iPosLgth^2 - link2Lgth^2)/(2*link1Lgth*iPosLgth)) + iPosAng;
     linkAng(2,2) = acos((link1Lgth^2 + link2Lgth^2 - iPosLgth^2)/(2*link1Lgth*link2Lgth));
@@ -181,10 +184,12 @@ y2(1) = y1;
 %% final position
     %Convert init coordinates to a position vector
     fPosLgth = hypot(finalX, finalY);
-    fPosAng = atan2(finalX, finalY);
+    fPosAng = atan2(finalY, finalX);
+
     %Calculate link angles from triangle made with init position vector
     linkAng(1,3) = acos((link1Lgth^2 + fPosLgth^2 - link2Lgth^2)/(2*link1Lgth*fPosLgth)) + fPosAng;
     linkAng(2,3) = acos((link1Lgth^2 + link2Lgth^2 - fPosLgth^2)/(2*link1Lgth*link2Lgth));
+
     %Calculate piston lengths
     pstKeyFrames(1,3) = sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,3)));
     pstKeyFrames(2,3) = sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,3)));
@@ -198,12 +203,11 @@ y2(1) = y1;
     pst2PltAng(3) = (link1Ang(3) - asin((pst2Link2*sin(link2Ang(3)))/pst2KeyFrames(2))); %relative to positive x axis
     %}
    
-
 %% Creating frames for animation
     fps = 60; %frames per second [frames/second]
     pstFrameStep = speed/60; %piston length change per frame    
-    
-    
+
+
     %% defualt to initial
 
     %initialize the first frame for this motion
@@ -336,22 +340,64 @@ y2(1) = y1;
 
     %calculate per frame plot element coordinates
     for i = 1:length(pstPlotLgth)
+
         %coordinates of the end of link 1
         link1End(1,i) = link1Lgth*cos(linkPlotAng(1,i));
         link1End(2,i) = link1Lgth*sin(linkPlotAng(1,i));
+        
         %coordinates of the end of link 2
         link2End(1,i) = link1Lgth*cos(linkPlotAng(1,i)) + link2Lgth*cos(linkPlotAng(2,i));
         link2End(2,i) = link1Lgth*sin(linkPlotAng(1,i)) + link2Lgth*sin(linkPlotAng(2,i));
+        
+        
         %coordinates of the end of piston 1, start is fixed at (pst1Grnd, 0)
         pst1End(1,i) = pstPlotLgth(1,i)*cos(pstPlotAng(1,i)) + pst1Grnd;
         pst1End(2,i) = pstPlotLgth(1,i)*sin(pstPlotAng(1,i));
+        
         %coordinates of the start of piston 2 along link 1
         pst2Start(1,i) = (link1Lgth - pst2Link1)*cos(linkPlotAng(1,i));
         pst2Start(2,i) = (link1Lgth - pst2Link1)*sin(linkPlotAng(1,i));
+        
         %coordinates of the end of piston 2 along link 2
         pst2End(1,i) = (link1Lgth - pst2Link1)*cos(linkPlotAng(1,i)) + pstPlotLgth(2,i)*cos(pstPlotAng(2,i));
         pst2End(2,i) = (link1Lgth - pst2Link1)*sin(linkPlotAng(1,i)) + pstPlotLgth(2,i)*sin(pstPlotAng(2,i));
     end
+%% using the calculated values for the obj position array
+
+    %% movable object initialisation
+    
+    
+    %moveable object parameters:
+    radius = 2; 
+    
+    %grabbing num of frames
+    num_frames = length(pstPlotLgth);
+    
+    %initialising positions for ball
+    objX = zeros(1, num_frames);
+    objY = zeros(1, num_frames);
+
+    %object stays at initial position till picked up
+    objX(1:diTotal) = initX;
+    objY(1:diTotal) = initY;
+
+    
+    %object follows link 2 end coordinates from initial to final
+    carry_frames = (diTotal + 1):(diTotal + ifTotal); %frame indices for following link 2
+    objX(carry_frames) = link2End(1, carry_frames);
+    objY(carry_frames) = link2End(2, carry_frames);
+
+    %obj stays at final position 
+    drop_frames = (diTotal + ifTotal + 1):num_frames; %frame indices for final position
+    objX(drop_frames) = objX(diTotal + ifTotal);
+    objY(drop_frames) = objY(diTotal + ifTotal);
+    
+
+    %position matrix for rectangle object acting as ball
+    obj_pos = [objX - radius; objY - radius; repmat(2*radius, 1, num_frames); repmat(2*radius, 1, num_frames)];
+    size(obj_pos)
+
+
     %% Possible constraints
 %{
     1. Position of ends of link 1 and link 2 must always be in the first 2
@@ -361,14 +407,8 @@ y2(1) = y1;
     3. Links will only move one at a time
 %}
 
-%moveable object parameters:
-radius = 2; 
 
-%params for current center position of the object TODO placeholder
-objX(1) = x2(1);% TODO Change to be the actual current position of the object instead of placeholders
-objY(1) = y2(1);%
 
-obj_pos = [objX - radius, objY - radius, 2*radius, 2*radius];
 
 %% Animations
 % TODO: move code below this up only when variables are needed further up
@@ -382,7 +422,7 @@ obj_pos = [objX - radius, objY - radius, 2*radius, 2*radius];
 ax1 = subplot(3, 1, [1 2]); %adds the plot, maybe leaving space for a text box at (2 1 2) that can explain ?
 hold on %allows everything here to be added to same figure
 
-title('Project 4: Placeholder Title');
+title('Project 4: Hydraulic 2 Segment Claw Arm');
 
 
 axis equal % sets axes to equal
@@ -398,9 +438,6 @@ axis equal % sets axes to equal
 
             piston2 = plot([pst2Start(1,1) pst2End(1,1)],[pst2Start(2,1) pst2End(2,1)],'-o','linewidth',2, 'Color', 'r'); %plots piston at link elbow
             
-            m_object = rectangle('Position', obj_pos,...
-                 'Curvature', [1 1], 'FaceColor', 'b', 'EdgeColor', 'k', 'LineWidth', 1.5);
-    
             % initial and final object positions: (should not move)
              init_object = rectangle('Position', [initX - radius, initY - radius, 2*radius, 2*radius],...
                  'Curvature', [1 1], 'FaceColor', 'w', 'EdgeColor', 'b', 'LineWidth', 1.5, 'LineStyle', '--');
@@ -408,20 +445,17 @@ axis equal % sets axes to equal
              final_object = rectangle('Position', [finalX - radius, finalY - radius, 2*radius, 2*radius],...
                  'Curvature', [1 1], 'FaceColor', 'w', 'EdgeColor', 'b', 'LineWidth', 1.5, 'LineStyle', '--');
 
-            
             % moveable object
-            m_object = rectangle('Position', obj_pos,...
+            m_object = rectangle('Position', obj_pos(:, 1),...
                  'Curvature', [1 1], 'FaceColor', 'b', 'EdgeColor', 'k', 'LineWidth', 1.5);
 
-
-    
 
  ax2 = subplot(3, 1, 3); %text box
 
 
-        str = {'We can explain a bit about the function/the project here',... ...
-            'placeholder for line 2',...
-            'placeholder for line 3',...
+        str = {'Inspired by toy robotics kits, this project animates ',... ...
+            'a hydraulic arm that can grab and move a ball from ',...
+            'an initial position to a final position',...
             };
         
         text(0.5, 0.5, str, ...
@@ -443,6 +477,8 @@ axis equal % sets axes to equal
         set(links,'XData',[x0 link1End(1,i) link2End(1,i)],'YData',[y0 link1End(2,i) link2End(2,i)]);
         set(piston1,'XData',[pst1Grnd pst1End(1,i)],'YData',[0 pst1End(2,i)]);
         set(piston2,'XData',[pst2Start(1,i) pst2End(1,i)],'YData',[pst2Start(2,i) pst2End(2,i)]);
+
+        set(m_object, 'Position', obj_pos(:, i));
 
     end %update end
 
