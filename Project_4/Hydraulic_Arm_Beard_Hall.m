@@ -1,11 +1,9 @@
 function [] = Hydraulic_Arm_Beard_Hall(linkLgth, initX, initY, finalX, finalY, speed)
 %Quick start: run Hydraulic_Arm_Beard_Hall() with no arguments to get a
-%rundown of the argument syntax and what each one is
-
+%rundown of the argument syntax in the command window
 
 %% Function Description
 %{
-
 This function mechanism_Beard_Hall takes the following inputs and animates a
 hydraulic robotic claw arm that can move an object between predetermined positions.
 
@@ -14,7 +12,7 @@ hydraulic robotic claw arm that can move an object between predetermined positio
   [cm]      finalX, finalY: the position the object should be moved to.
   [cm/s]    speed:          the animation speed, piston length change per second
 
-Mathematical Overview:
+__Mathematical Overview____________________________________________________
 
     The initial and final positions will be converted to vectors that form
 triangles with both links. The angles for these resulting triangles are
@@ -40,7 +38,7 @@ positions. Graphs showing the piston lengths over time and the object's
 path between the initial and final positions are plotted in tandem with the
 animation.
 
-Project Background and inspiration:
+__Project Background and inspiration_______________________________________
 
     This project was inspired by toy robotics kits that use hydraulic pistons to
 make a simple 2 part arm that you can then program and control. As this is
@@ -55,15 +53,13 @@ arm once this node overlaps the object center. The two arms were also fixed
 to be the same length, as this greatly simplifies the cases the animation
 must cover.
 
-
 %}
 
 %% Housekeeping for repeated running/testing and message for if run improperly
 
 close all %closes any windows that are open still
 
-% default values to use if none supplied in call
-
+% message for if run with wrong number of arguments
 if nargin < 6
     fprintf(['\n\n**This function Hydraulic_Arm_Beard_Hall animates a hydraulic robotic arm that can move an object between two predetermined positions**' ...
     '\n\n' ...
@@ -78,12 +74,9 @@ if nargin < 6
     return
 end
 
-
 %% Scalar variables within function
 % -------------------------------------------------------------------------
-
 %{
-
 Given inputs: 
 
 SCALAR link1Lgth : input arg, 1st arm length (ground to elbow) 
@@ -102,46 +95,38 @@ SCALAR      pst2Link1: distance along link 1 (from elbow)
 
 SCALAR      maxReach: The length of the 2 arms added together, which sets
 the radius of the outer circle bounding what the grabber can reach
-
-SCALAR      minReach: TODO decide if this is needed
-
 %}
 
 
-%% Geometry based fixed Parameters
-% -------------------------------------------------------------------------
+%% initialize fixed parameters
 
+% Piston 1 distances along links, scales with arm length
 link1Lgth = linkLgth;
-
-% Piston 1 coordinates, scales with arm length
 pst1Link1 = link1Lgth*0.25; %point where piston 1 attaches to link 1 mesaured from ground
 pst1Grnd = link1Lgth*0.1; %point where piston 1 attaches to ground measured as distance from arm base/origin
 
+% Piston 2 distances along links, scales with arm length
 link2Lgth = linkLgth;
-
-% Piston 2 coordinates, scales with arm length
 pst2Link2 = link2Lgth*0.25; %point where piston 2 attaches to link 2 measured along link 2 from elbow
 pst2Link1 = link1Lgth*0.1; %point where piston 2 attaches to link 1 measured along link 1 from elbow
-
-% max/min spans (to check that points are within the reachable area)
-maxReach = link1Lgth + link2Lgth; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
-minReach = abs(link2Lgth - link1Lgth); %TODO eval if this is needed still
 
 %the origin (fixed side of link 1)
 x0 = 0;
 y0 = 0;
 
+%max reachable area for compatibility checks
+maxReach = link1Lgth + link2Lgth; %This length, as a diagonal, will be used to establish a square of acceptable coordinates?
+
 %moveable object parameters:
 radius = 0.05*linkLgth; 
-    
+ 
 
 %% Compatibility checks
-% -------------------------------------------------------------------------
 
 %{
-These compatibility checks ensure that all inputs are valid, and returns an appropriate error message if not. Speed and link
-length must be positive 
-
+These compatibility checks ensure that all argument inputs are valid, and returns an appropriate error message if not. 
+Speed and link length must be positive
+Object must be in 1st quadrant and cannot clip through the ground
 %}
 
 % Checks that speed is positive non-zero number
@@ -181,9 +166,9 @@ end
 
 
 %% Arrays for initial position calculations
-% -------------------------------------------------------------------------
 %{
-Arrays, hard coded default position assumes link 1 points straight up and link 2 is at TODO radians from + x axis
+The hard coded default position assumes link 1 points straight up and link
+2 is -45 from the horizontal
 % for the following 2 arrays, first index is the piston or link number, and the second index is the specific position
 
 Indices in use:
@@ -191,17 +176,14 @@ Indices in use:
  2 = initial position of object
  3 = final position
 %}
-% -------------------------------------------------------------------------
 
 % Angles needed for calculating piston lengths
-%initialises at 90 deg for link 1 and -45 deg for link 2, relative to horisontal, 
-linkAng = [pi/2, 0, 0; -pi/4, 0, 0];  % 2 by 3 ARRAY
+linkAng = [pi/2, 0, 0; -pi/4, 0, 0];  
 
 % Piston lengths associated with default, initial, and final positions
 pstKeyFrames = [sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,1))),0,0; sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,1))),0,0];
-% 3 by 2 ARRAY
 
-%% initialising empty arrays to be filled with frame specific angle or length 
+%% initialising empty arrays to be filled with frame specific angle or length data
 
 % Plotting parameters
 linkPlotAng = zeros(2,0); %link angles
@@ -216,9 +198,7 @@ pst2End = zeros(2,0);
 link1End = zeros(2,0);
 link2End = zeros(2,0);
 
-
 %% Calculating initial position piston lengths
-
     %Convert init coordinates to a position vector
     iPosLgth = hypot(initX, initY); %SCALAR, length unit
     iPosAng = atan2(initY, initX); %SCALAR, RADS
@@ -233,9 +213,7 @@ link2End = zeros(2,0);
     pstKeyFrames(1,2) = sqrt(pst1Grnd^2+pst1Link1^2-2*pst1Grnd*pst1Link1*cos(linkAng(1,2)));
     pstKeyFrames(2,2) = sqrt(pst2Link1^2+pst2Link2^2-2*pst2Link1*pst2Link2*cos(linkAng(2,2)));
 
-
 %% Calculating final position piston lengths
-
     %Convert init coordinates to a position vector
     fPosLgth = hypot(finalX, finalY);
     fPosAng = atan2(finalY, finalX);
@@ -250,10 +228,10 @@ link2End = zeros(2,0);
 
 %% Creating frames for animation
 
-fps = 60; %frames per second
-pstFrameStep = speed/60; %piston length change per frame    
-
-timestep = 1/fps; % fps inverted gives seconds per frame
+    fps = 60; %frames per second
+    pstFrameStep = speed/60; %piston length change per frame    
+    
+    timestep = 1/fps; % fps inverted gives seconds per frame
 
 %% Populating the positions for all links for 3 phases of motion: ===================================================================================================
 %{
@@ -271,7 +249,7 @@ its final spot, and is returning to its default position. This is denoted
 by "final to default" or fd in some variable names
 
 %}
-  %% defualt to initial 
+  %% default to initial 
 % diTotal: number of frames in this stage of motion
 
   %initialize the first frame for this motion from the keyframes
@@ -394,8 +372,7 @@ by "final to default" or fd in some variable names
         end
     end
     
-%% making these into coordinate arrays
-
+%% converting from angles to coordinate arrays for graphing purposes
 
 % Calculate angles of all plot elements relative to positive x axis for each
 % frame based on piston lengths
@@ -431,7 +408,6 @@ for i = 1:length(pstPlotLgth)
     pst2End(1,i) = (link1Lgth - pst2Link1)*cos(linkPlotAng(1,i)) + pstPlotLgth(2,i)*cos(pstPlotAng(2,i));
     pst2End(2,i) = (link1Lgth - pst2Link1)*sin(linkPlotAng(1,i)) + pstPlotLgth(2,i)*sin(pstPlotAng(2,i));
 end
-
 
 %% movable object initialisation and coordinates
     
@@ -622,9 +598,7 @@ title('Animation Window');
         %path tracing marker
         set(pathMark, 'XData', obj_pos(1,i), 'YData', obj_pos(2,i));
 
-
     end %update end
-
 
 end %main function close
 
