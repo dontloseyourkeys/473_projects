@@ -523,7 +523,7 @@ title('Animation Window');
         ylim([ymin, ymax]);
     
         pathPlot = plot(obj_pos(1,:),obj_pos(2,:), 'LineWidth', 1, 'Color', 'r',  'LineStyle', '--');
-        pathMark = plot(obj_pos(:,1),obj_pos(:,1), 'bo', 'MarkerFaceColor','r','MarkerSize',10);
+        pathMark = plot(obj_pos(1,1),obj_pos(2,1), 'bo', 'MarkerFaceColor','r','MarkerSize',10);
         hold off;
     
 %piston length plots 
